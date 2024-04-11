@@ -106,7 +106,20 @@ func TestKeyValueInjector(t *testing.T) {
 	}
 
 	finalContract, err := KeyValueInjector(contractMap, key, value)
+	if err != nil {
+		fmt.Println(err)
+	}
 
 	assert.Contains(t, finalContract, fmt.Sprintf("%s: %s", key, value))
+	assert.NoError(t, err)
+}
+
+func TestCertificateDownloader(t *testing.T) {
+	certificate, err := CertificateDownloader("https://cloud.ibm.com/media/docs/downloads/hyper-protect-container-runtime/ibm-hyper-protect-container-runtime-1-0-s390x-15-encrypt.crt")
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	assert.Contains(t, certificate, "-----BEGIN CERTIFICATE-----")
 	assert.NoError(t, err)
 }

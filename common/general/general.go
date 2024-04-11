@@ -3,6 +3,8 @@ package general
 import (
 	"bytes"
 	"encoding/base64"
+	"io"
+	"net/http"
 	"os"
 	"os/exec"
 	"strings"
@@ -87,4 +89,22 @@ func KeyValueInjector(contract map[string]interface{}, key, value string) (strin
 	}
 
 	return string(modifiedYAMLBytes), nil
+}
+
+// CertificateDownloader - function to download encryption certificate
+func CertificateDownloader(url string) (string, error) {
+	// Send a GET request to the URL
+	resp, err := http.Get(url)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	// Read the response body
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	return string(body), nil
 }
