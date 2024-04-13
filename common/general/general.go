@@ -123,3 +123,8 @@ func DecodeBase64String(base64Data string) (string, error) {
 
 	return string(decodedData), nil
 }
+
+// GetEncryptPassWorkload - function to get encrypted password and encrypted workload from data
+func GetEncryptPassWorkload(encryptedData string) (string, string) {
+	return strings.Split(encryptedData, ".")[1], strings.Split(encryptedData, ".")[2]
+}

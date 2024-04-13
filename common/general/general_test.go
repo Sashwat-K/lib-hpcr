@@ -162,3 +162,13 @@ func TestDecodeBase64String(t *testing.T) {
 	assert.Equal(t, data, result)
 	assert.NoError(t, err)
 }
+
+// Testcase to check if GetEncryptPassWorkload() can fetch encoded encrypted passowrd and encoded encrypted data from string
+func TestGetEncryptPassWorkload(t *testing.T) {
+	encryptedData := "hyper-protect-basic.sashwat.k"
+
+	a, b := GetEncryptPassWorkload(encryptedData)
+
+	assert.Equal(t, a, "sashwat")
+	assert.Equal(t, b, "k")
+}
