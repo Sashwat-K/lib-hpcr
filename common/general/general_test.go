@@ -53,6 +53,22 @@ func TestCreateTempFile(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+// Testcase to check TestRemoveTempFile removes a file
+func TestRemoveTempFile(t *testing.T) {
+	text := "Testing"
+	tmpfile, err := CreateTempFile(text)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	err = RemoveTempFile(tmpfile)
+
+	_, err1 := os.Stat(tmpfile)
+
+	assert.NoError(t, err)
+	assert.True(t, os.IsNotExist(err1), "The created file was removed and must not exist")
+}
+
 // Testcase to check if EncodeToBase64 can encode string to base64
 func TestEncodeToBase64(t *testing.T) {
 	base64data := "c2FzaHdhdGs="
@@ -128,5 +144,21 @@ func TestCertificateDownloader(t *testing.T) {
 	}
 
 	assert.Contains(t, certificate, "-----BEGIN CERTIFICATE-----")
+	assert.NoError(t, err)
+}
+
+// Testcase to check if DecodeBase64String can decode base64 string
+func TestDecodeBase64String(t *testing.T) {
+	data := "sashwatk"
+	base64Data := "c2FzaHdhdGs="
+
+	result, err := DecodeBase64String(base64Data)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Println(result)
+
+	assert.Equal(t, data, result)
 	assert.NoError(t, err)
 }

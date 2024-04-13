@@ -44,7 +44,7 @@ func ExecCommand(name string, stdinInput string, args ...string) (string, error)
 	return out.String(), nil
 }
 
-// CreateTempFile - Function to create temp file
+// CreateTempFile - function to create temp file
 func CreateTempFile(data string) (string, error) {
 
 	trimmedData := strings.TrimSpace(data)
@@ -62,6 +62,11 @@ func CreateTempFile(data string) (string, error) {
 
 	// Return the path to the temp file.
 	return tmpFile.Name(), nil
+}
+
+// RemoveTempFile - function to remove temp file
+func RemoveTempFile(filePath string) error {
+	return os.Remove(filePath)
 }
 
 // EncodeToBase64 - function to encode string as base64
@@ -107,4 +112,14 @@ func CertificateDownloader(url string) (string, error) {
 	}
 
 	return string(body), nil
+}
+
+// DecodeBase64String - function to decode base64 string
+func DecodeBase64String(base64Data string) (string, error) {
+	decodedData, err := base64.StdEncoding.DecodeString(base64Data)
+	if err != nil {
+		return "", err
+	}
+
+	return string(decodedData), nil
 }

@@ -3,7 +3,6 @@ package encrypt
 import (
 	"encoding/json"
 	"fmt"
-	"os"
 
 	gen "github.com/Sashwat-K/lib-hpcr/common/general"
 )
@@ -45,7 +44,7 @@ func EncryptPassword(password, cert string) (string, error) {
 		return "", err
 	}
 
-	err = os.Remove(encryptCertPath)
+	err = gen.RemoveTempFile(encryptCertPath)
 	if err != nil {
 		return "", err
 	}
@@ -70,7 +69,7 @@ func EncryptContract(password string, section map[string]interface{}) (string, e
 		return "", err
 	}
 
-	err = os.Remove(contractPath)
+	err = gen.RemoveTempFile(contractPath)
 	if err != nil {
 		return "", err
 	}
@@ -105,7 +104,7 @@ func CreateSigningCert(privateKey, cacert, cakey, csrData, csrPemData string, ex
 			return "", err
 		}
 
-		err = os.Remove(privateKeyPath)
+		err = gen.RemoveTempFile(privateKeyPath)
 		if err != nil {
 			return "", err
 		}
@@ -134,7 +133,7 @@ func CreateSigningCert(privateKey, cacert, cakey, csrData, csrPemData string, ex
 	}
 
 	for _, path := range []string{csrPath, caCertPath, caKeyPath} {
-		err := os.Remove(path)
+		err := gen.RemoveTempFile(path)
 		if err != nil {
 			return "", err
 		}
@@ -167,7 +166,7 @@ func SignContract(encryptedWorkload, encryptedEnv, privateKey string) (string, e
 		return "", err
 	}
 
-	err = os.Remove(privateKeyPath)
+	err = gen.RemoveTempFile(privateKeyPath)
 	if err != nil {
 		return "", err
 	}
