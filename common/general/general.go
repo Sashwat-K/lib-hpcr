@@ -144,15 +144,15 @@ func CheckUrlExists(url string) (bool, error) {
 }
 
 // GetDataFromLatestVersion - function to get the value based on constraints
-func GetDataFromLatestVersion(jsonData, version string) (string, error) {
+func GetDataFromLatestVersion(jsonData, version string) (string, string, error) {
 	var dataMap map[string]string
 	if err := json.Unmarshal([]byte(jsonData), &dataMap); err != nil {
-		return "", fmt.Errorf("error unmarshaling JSON data: %v", err)
+		return "", "", fmt.Errorf("error unmarshaling JSON data: %v", err)
 	}
 
 	targetConstraint, err := semver.NewConstraint(version)
 	if err != nil {
-		return "", fmt.Errorf("error parsing target version constraint: %v", err)
+		return "", "", fmt.Errorf("error parsing target version constraint: %v", err)
 	}
 
 	var matchingVersions []*semver.Version
@@ -160,7 +160,7 @@ func GetDataFromLatestVersion(jsonData, version string) (string, error) {
 	for versionStr := range dataMap {
 		version, err := semver.NewVersion(versionStr)
 		if err != nil {
-			return "", fmt.Errorf("error parsing version: %v", err)
+			return "", "", fmt.Errorf("error parsing version: %v", err)
 		}
 
 		if targetConstraint.Check(version) {
@@ -173,9 +173,9 @@ func GetDataFromLatestVersion(jsonData, version string) (string, error) {
 	// Get the latest version and its corresponding data
 	if len(matchingVersions) > 0 {
 		latestVersion := matchingVersions[0]
-		return dataMap[latestVersion.String()], nil
+		return latestVersion.String(), dataMap[latestVersion.String()], nil
 	}
 
 	// No matching version found
-	return "", fmt.Errorf("no matching version found for the given constraint")
+	return "", "", fmt.Errorf("no matching version found for the given constraint")
 }

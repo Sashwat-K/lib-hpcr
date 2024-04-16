@@ -194,11 +194,12 @@ func TestGetDataFromLatestVersion(t *testing.T) {
 	}`
 	versionConstraints := ">= 1.0.0, <= 3.5.10"
 
-	result, err := GetDataFromLatestVersion(jsonData, versionConstraints)
+	key, value, err := GetDataFromLatestVersion(jsonData, versionConstraints)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	assert.Equal(t, result, "data4")
+	assert.Equal(t, key, "3.5.10")
+	assert.Equal(t, value, "data4")
 	assert.NoError(t, err)
 }
