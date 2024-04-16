@@ -3,12 +3,16 @@ package general
 import (
 	"bytes"
 	"encoding/base64"
+	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"os/exec"
+	"sort"
 	"strings"
 
+	"github.com/Masterminds/semver/v3"
 	"gopkg.in/yaml.v3"
 )
 
@@ -127,4 +131,51 @@ func DecodeBase64String(base64Data string) (string, error) {
 // GetEncryptPassWorkload - function to get encrypted password and encrypted workload from data
 func GetEncryptPassWorkload(encryptedData string) (string, string) {
 	return strings.Split(encryptedData, ".")[1], strings.Split(encryptedData, ".")[2]
+}
+
+// CheckUrlExists - function to check if URL exists or not
+func CheckUrlExists(url string) (bool, error) {
+	response, err := http.Head(url)
+	if err != nil {
+		return false, err
+	}
+
+	return response.StatusCode >= 200 && response.StatusCode < 300, nil
+}
+
+// GetDataFromLatestVersion - function to get the value based on constraints
+func GetDataFromLatestVersion(jsonData, version string) (string, error) {
+	var dataMap map[string]string
+	if err := json.Unmarshal([]byte(jsonData), &dataMap); err != nil {
+		return "", fmt.Errorf("error unmarshaling JSON data: %v", err)
+	}
+
+	targetConstraint, err := semver.NewConstraint(version)
+	if err != nil {
+		return "", fmt.Errorf("error parsing target version constraint: %v", err)
+	}
+
+	var matchingVersions []*semver.Version
+
+	for versionStr := range dataMap {
+		version, err := semver.NewVersion(versionStr)
+		if err != nil {
+			return "", fmt.Errorf("error parsing version: %v", err)
+		}
+
+		if targetConstraint.Check(version) {
+			matchingVersions = append(matchingVersions, version)
+		}
+	}
+
+	sort.Sort(sort.Reverse(semver.Collection(matchingVersions)))
+
+	// Get the latest version and its corresponding data
+	if len(matchingVersions) > 0 {
+		latestVersion := matchingVersions[0]
+		return dataMap[latestVersion.String()], nil
+	}
+
+	// No matching version found
+	return "", fmt.Errorf("no matching version found for the given constraint")
 }

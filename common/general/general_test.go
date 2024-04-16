@@ -11,7 +11,8 @@ import (
 )
 
 const (
-	simpleContractPath = "../../samples/simple_contract.yaml"
+	simpleContractPath     = "../../samples/simple_contract.yaml"
+	certificateDownloadUrl = "https://cloud.ibm.com/media/docs/downloads/hyper-protect-container-runtime/ibm-hyper-protect-container-runtime-1-0-s390x-15-encrypt.crt"
 )
 
 // Testcase to check ExecCommand works
@@ -138,7 +139,7 @@ func TestKeyValueInjector(t *testing.T) {
 
 // Testcase to check if CertificateDownloader can download enxryption certificate
 func TestCertificateDownloader(t *testing.T) {
-	certificate, err := CertificateDownloader("https://cloud.ibm.com/media/docs/downloads/hyper-protect-container-runtime/ibm-hyper-protect-container-runtime-1-0-s390x-15-encrypt.crt")
+	certificate, err := CertificateDownloader(certificateDownloadUrl)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -171,4 +172,33 @@ func TestGetEncryptPassWorkload(t *testing.T) {
 
 	assert.Equal(t, a, "sashwat")
 	assert.Equal(t, b, "k")
+}
+
+func TestCheckUrlExists(t *testing.T) {
+	result, err := CheckUrlExists(certificateDownloadUrl)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	assert.Equal(t, result, true)
+	assert.NoError(t, err)
+}
+
+func TestGetDataFromLatestVersion(t *testing.T) {
+	jsonData := `{
+		"1.0.0": "data1",
+		"1.2.5": "data2",
+		"2.0.5": "data3",
+		"3.5.10": "data4",
+		"4.0.0": "data5"
+	}`
+	versionConstraints := ">= 1.0.0, <= 3.5.10"
+
+	result, err := GetDataFromLatestVersion(jsonData, versionConstraints)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	assert.Equal(t, result, "data4")
+	assert.NoError(t, err)
 }
