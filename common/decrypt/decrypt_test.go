@@ -15,6 +15,7 @@ const (
 	privateKeyPath        = "../../samples/attestation/private.pem"
 )
 
+// Testcase to check if DecryptPassword() is able to decrypt password
 func TestDecryptPassword(t *testing.T) {
 	encChecksumPath, err := os.Open(encryptedChecksumPath)
 	if err != nil {
@@ -48,6 +49,7 @@ func TestDecryptPassword(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+// Testcase to check if DecryptWorkload() is able to decrypt workload
 func TestDecryptWorkload(t *testing.T) {
 	encChecksumPath, err := os.Open(encryptedChecksumPath)
 	if err != nil {

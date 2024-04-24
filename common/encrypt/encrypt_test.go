@@ -18,17 +18,29 @@ const (
 	certificateUrl       = "https://cloud.ibm.com/media/docs/downloads/hyper-protect-container-runtime/ibm-hyper-protect-container-runtime-1-0-s390x-15-encrypt.crt"
 	simpleContractPath   = "../../samples/simple_contract.yaml"
 	samplePrivateKeyPath = "../../samples/contract-expiry/private.pem"
-	samplelCaCertPath    = "../../samples/contract-expiry/personal_ca.crt"
+	sampleCaCertPath     = "../../samples/contract-expiry/personal_ca.crt"
 	sampleCaKeyPath      = "../../samples/contract-expiry/personal_ca.pem"
 	sampleCsrFilePath    = "../../samples/contract-expiry/csr.pem"
+
+	sampleCsrCountry  = "IN"
+	sampleCsrState    = "Karnataka"
+	sampleCsrLocation = "Bangalore"
+	sampleCsrOrg      = "IBM"
+	sampleCsrUnit     = "ISDL"
+	sampleCsrDomain   = "HPVS"
+	sampleCsrMailId   = "sashwat.k@ibm.com"
+
+	sampleExpiryDays = 365
 )
 
+// Testcase to check if OpensslCheck() is able to check if openssl is present in the system or not
 func TestOpensslCheck(t *testing.T) {
 	err := OpensslCheck()
 
 	assert.NoError(t, err)
 }
 
+// Testcase to check if RandomPasswordGenerator() is able to generate random password
 func TestRandomPasswordGenerator(t *testing.T) {
 	result, err := RandomPasswordGenerator()
 
@@ -36,8 +48,9 @@ func TestRandomPasswordGenerator(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+// Testcase to check if EncryptPassword() is able to encrypt password
 func TestEncryptPassword(t *testing.T) {
-	passowrd, err := RandomPasswordGenerator()
+	password, err := RandomPasswordGenerator()
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -47,7 +60,7 @@ func TestEncryptPassword(t *testing.T) {
 		fmt.Println(err)
 	}
 
-	result, err := EncryptPassword(passowrd, encryptCertificate)
+	result, err := EncryptPassword(password, encryptCertificate)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -56,6 +69,7 @@ func TestEncryptPassword(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+// Testcase to check if EncryptContract() is able to encrypt contract
 func TestEncryptContract(t *testing.T) {
 	var contractMap map[string]interface{}
 
@@ -75,12 +89,12 @@ func TestEncryptContract(t *testing.T) {
 		fmt.Println(err)
 	}
 
-	passowrd, err := RandomPasswordGenerator()
+	password, err := RandomPasswordGenerator()
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	result, err := EncryptContract(passowrd, contractMap["workload"].(map[string]interface{}))
+	result, err := EncryptContract(password, contractMap["workload"].(map[string]interface{}))
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -89,6 +103,7 @@ func TestEncryptContract(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+// Testcase to check if EncryptFinalStr() is able to generate hyper-protect-basic.<password>.<workload>
 func TestEncryptFinalStr(t *testing.T) {
 	var contractMap map[string]interface{}
 
@@ -135,6 +150,7 @@ func TestEncryptFinalStr(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+// Testcase to check if CreateSigningCert() is able to create signing certificate with CSR parameters
 func TestCreateSigningCert(t *testing.T) {
 	privateKeyPath, err := os.Open(samplePrivateKeyPath)
 	if err != nil {
@@ -147,7 +163,7 @@ func TestCreateSigningCert(t *testing.T) {
 		fmt.Println(err)
 	}
 
-	cacertPath, err := os.Open(samplelCaCertPath)
+	cacertPath, err := os.Open(sampleCaCertPath)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -170,20 +186,20 @@ func TestCreateSigningCert(t *testing.T) {
 	}
 
 	csrDataMap := map[string]interface{}{
-		"country":  "IN",
-		"state":    "Karnataka",
-		"location": "Bangalore",
-		"org":      "IBM",
-		"unit":     "ISDL",
-		"domain":   "HPVS",
-		"mail":     "sashwat.k@ibm.com",
+		"country":  sampleCsrCountry,
+		"state":    sampleCsrState,
+		"location": sampleCsrLocation,
+		"org":      sampleCsrOrg,
+		"unit":     sampleCsrUnit,
+		"domain":   sampleCsrDomain,
+		"mail":     sampleCsrMailId,
 	}
 	csrDataStr, err := json.Marshal(csrDataMap)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	signingCert, err := CreateSigningCert(string(privateKey), string(cacert), string(caKey), string(csrDataStr), "", 365)
+	signingCert, err := CreateSigningCert(string(privateKey), string(cacert), string(caKey), string(csrDataStr), "", sampleExpiryDays)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -192,6 +208,7 @@ func TestCreateSigningCert(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+// Testcase to check if CreateSigningCert() is able to create signing certificate using CSR file
 func TestCreateSigningCertCsrFile(t *testing.T) {
 	privateKeyPath, err := os.Open(samplePrivateKeyPath)
 	if err != nil {
@@ -204,7 +221,7 @@ func TestCreateSigningCertCsrFile(t *testing.T) {
 		fmt.Println(err)
 	}
 
-	cacertPath, err := os.Open(samplelCaCertPath)
+	cacertPath, err := os.Open(sampleCaCertPath)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -237,7 +254,7 @@ func TestCreateSigningCertCsrFile(t *testing.T) {
 		fmt.Println(err)
 	}
 
-	signingCert, err := CreateSigningCert(string(privateKey), string(cacert), string(caKey), "", string(csr), 365)
+	signingCert, err := CreateSigningCert(string(privateKey), string(cacert), string(caKey), "", string(csr), sampleExpiryDays)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -246,6 +263,7 @@ func TestCreateSigningCertCsrFile(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+// Testcase to check if SignContract() is able to sign the contract
 func TestSignContract(t *testing.T) {
 	var contractMap map[string]interface{}
 
@@ -313,6 +331,7 @@ func TestSignContract(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+// Testcase to check if GenFinalSignedContract() is able to generate signed contract
 func TestGenFinalSignedContract(t *testing.T) {
 	_, err := GenFinalSignedContract("test1", "test2", "test3")
 

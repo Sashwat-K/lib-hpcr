@@ -13,23 +13,26 @@ import (
 const (
 	simpleContractPath     = "../../samples/simple_contract.yaml"
 	certificateDownloadUrl = "https://cloud.ibm.com/media/docs/downloads/hyper-protect-container-runtime/ibm-hyper-protect-container-runtime-1-0-s390x-15-encrypt.crt"
+
+	sampleBase64Data        = "c2FzaHdhdGs="
+	sampleDecodedBase64Data = "sashwatk"
 )
 
-// Testcase to check ExecCommand works
+// Testcase to check ExecCommand() works
 func TestExecCommand(t *testing.T) {
 	_, err := ExecCommand("openssl", "", "version")
 
 	assert.NoError(t, err)
 }
 
-// Testcase to check ExecCommand when user input is given
+// Testcase to check ExecCommand() when user input is given
 func TestExecCommandUserInput(t *testing.T) {
 	_, err := ExecCommand("openssl", "hello", "version")
 
 	assert.NoError(t, err)
 }
 
-// Testcase to check if CreateTempFile can create and modify temp files
+// Testcase to check if CreateTempFile() can create and modify temp files
 func TestCreateTempFile(t *testing.T) {
 	text := "Testing"
 	tmpfile, err := CreateTempFile(text)
@@ -54,7 +57,7 @@ func TestCreateTempFile(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-// Testcase to check TestRemoveTempFile removes a file
+// Testcase to check TestRemoveTempFile() removes a file
 func TestRemoveTempFile(t *testing.T) {
 	text := "Testing"
 	tmpfile, err := CreateTempFile(text)
@@ -70,15 +73,14 @@ func TestRemoveTempFile(t *testing.T) {
 	assert.True(t, os.IsNotExist(err1), "The created file was removed and must not exist")
 }
 
-// Testcase to check if EncodeToBase64 can encode string to base64
+// Testcase to check if EncodeToBase64() can encode string to base64
 func TestEncodeToBase64(t *testing.T) {
-	base64data := "c2FzaHdhdGs="
-	result := EncodeToBase64("sashwatk")
+	result := EncodeToBase64(sampleDecodedBase64Data)
 
-	assert.Equal(t, result, base64data)
+	assert.Equal(t, result, sampleBase64Data)
 }
 
-// Testcase to check if MapToYaml can convert Map to YAML string
+// Testcase to check if MapToYaml() can convert Map to YAML string
 func TestMapToYaml(t *testing.T) {
 	var contractMap map[string]interface{}
 
@@ -106,7 +108,7 @@ func TestMapToYaml(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-// Testcase to check if KeyValueInjector can add key value to exisitng map
+// Testcase to check if KeyValueInjector() can add key value to existing map
 func TestKeyValueInjector(t *testing.T) {
 	var contractMap map[string]interface{}
 	key := "envWorkloadSignature"
@@ -137,7 +139,7 @@ func TestKeyValueInjector(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-// Testcase to check if CertificateDownloader can download enxryption certificate
+// Testcase to check if CertificateDownloader() can download encryption certificate
 func TestCertificateDownloader(t *testing.T) {
 	certificate, err := CertificateDownloader(certificateDownloadUrl)
 	if err != nil {
@@ -148,23 +150,20 @@ func TestCertificateDownloader(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-// Testcase to check if DecodeBase64String can decode base64 string
+// Testcase to check if DecodeBase64String() can decode base64 string
 func TestDecodeBase64String(t *testing.T) {
-	data := "sashwatk"
-	base64Data := "c2FzaHdhdGs="
-
-	result, err := DecodeBase64String(base64Data)
+	result, err := DecodeBase64String(sampleBase64Data)
 	if err != nil {
 		fmt.Println(err)
 	}
 
 	fmt.Println(result)
 
-	assert.Equal(t, data, result)
+	assert.Equal(t, sampleDecodedBase64Data, result)
 	assert.NoError(t, err)
 }
 
-// Testcase to check if GetEncryptPassWorkload() can fetch encoded encrypted passowrd and encoded encrypted data from string
+// Testcase to check if GetEncryptPassWorkload() can fetch encoded encrypted password and encoded encrypted data from string
 func TestGetEncryptPassWorkload(t *testing.T) {
 	encryptedData := "hyper-protect-basic.sashwat.k"
 
