@@ -7,17 +7,22 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGetEncryptionCertificateFromJson(t *testing.T) {
-	jsonData := `{
+var (
+	sampleJsonData = `{
 		"1.0.0": "data1",
 		"1.2.5": "data2",
 		"2.0.5": "data3",
 		"3.5.10": "data4",
 		"4.0.0": "data5"
 	}`
+	sampleEncryptionCertVersions = []string{"1.0.13", "1.0.14", "1.0.15"}
+)
+
+// Testcase to check if GetEncryptionCertificateFromJson() gets encryption certificate as per version constraint
+func TestGetEncryptionCertificateFromJson(t *testing.T) {
 	version := "> 1.0.0"
 
-	key, value, err := GetEncryptionCertificateFromJson(jsonData, version)
+	key, value, err := GetEncryptionCertificateFromJson(sampleJsonData, version)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -27,9 +32,9 @@ func TestGetEncryptionCertificateFromJson(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+// Testcase to check if DownloadEncryptionCertificates() is able to download encryption certificates as per constraint
 func TestDownloadEncryptionCertificates(t *testing.T) {
-	version := []string{"1.0.13", "1.0.14", "1.0.15"}
-	certs, err := DownloadEncryptionCertificates(version)
+	certs, err := DownloadEncryptionCertificates(sampleEncryptionCertVersions)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -38,9 +43,9 @@ func TestDownloadEncryptionCertificates(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+// Testcase to check both DownloadEncryptionCertificates() and GetEncryptionCertificateFromJson() together
 func TestCombined(t *testing.T) {
-	encryptionCertVersions := []string{"1.0.13", "1.0.14", "1.0.15"}
-	certs, err := DownloadEncryptionCertificates(encryptionCertVersions)
+	certs, err := DownloadEncryptionCertificates(sampleEncryptionCertVersions)
 	if err != nil {
 		fmt.Println(err)
 	}

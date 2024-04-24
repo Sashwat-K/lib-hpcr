@@ -14,7 +14,7 @@ const (
 	privateKeyPath        = "../samples/attestation/private.pem"
 )
 
-// Testcase to check if TestGetAttestationRecords() retrives attestation records from encrypted data
+// Testcase to check if GetAttestationRecords() retrives attestation records from encrypted data
 func TestGetAttestationRecords(t *testing.T) {
 	encChecksumPath, err := os.Open(encryptedChecksumPath)
 	if err != nil {
