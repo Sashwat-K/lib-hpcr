@@ -23,6 +23,7 @@ type (
 	ImageVersion struct {
 		ID       string
 		Checksum string
+		Name     string
 		Version  *semver.Version
 	}
 )
@@ -36,14 +37,14 @@ var (
 )
 
 // SelectImage - function to return the latest HPVS image
-func SelectImage(imageJsonData, versionSpec string) (string, string, string, error) {
+func SelectImage(imageJsonData, versionSpec string) (string, string, string, string, error) {
 	var images []Image
 	var hyperProtectImages []ImageVersion
 
 	err := json.Unmarshal([]byte(imageJsonData), &images)
 	if err != nil {
 		fmt.Println("Error:", err)
-		return "", "", "", err
+		return "", "", "", "", err
 	}
 
 	for _, image := range images {
@@ -51,6 +52,7 @@ func SelectImage(imageJsonData, versionSpec string) (string, string, string, err
 			versionRegex := reHyperProtectName.FindStringSubmatch(image.Name)
 			hyperProtectImages = append(hyperProtectImages, ImageVersion{
 				ID:       image.ID,
+				Name:     image.Name,
 				Checksum: image.Checksum,
 				Version:  semver.MustParse(fmt.Sprintf("%s.%s.%s", versionRegex[1], versionRegex[2], versionRegex[3])),
 			})
@@ -66,10 +68,10 @@ func IsCandidateImage(img Image) bool {
 }
 
 // PickLatestImage - function to pick the latest Hyper Protect Image
-func PickLatestImage(hyperProtectImages []ImageVersion, version string) (string, string, string, error) {
+func PickLatestImage(hyperProtectImages []ImageVersion, version string) (string, string, string, string, error) {
 	targetConstraint, err := semver.NewConstraint(version)
 	if err != nil {
-		return "", "", "", fmt.Errorf("error parsing target version constraint: %v", err)
+		return "", "", "", "", fmt.Errorf("error parsing target version constraint: %v", err)
 	}
 
 	var matchingVersions []*semver.Version
@@ -85,10 +87,10 @@ func PickLatestImage(hyperProtectImages []ImageVersion, version string) (string,
 	if len(matchingVersions) > 0 {
 		for _, image := range hyperProtectImages {
 			if image.Version.Equal(matchingVersions[0]) {
-				return image.ID, image.Checksum, image.Version.String(), nil
+				return image.ID, image.Name, image.Checksum, image.Version.String(), nil
 			}
 		}
 	}
 
-	return "", "", "", fmt.Errorf("no Hyper Protect image matching version found for the given constraint")
+	return "", "", "", "", fmt.Errorf("no Hyper Protect image matching version found for the given constraint")
 }

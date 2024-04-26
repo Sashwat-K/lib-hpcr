@@ -36,12 +36,13 @@ func TestSelectImage(t *testing.T) {
 		fmt.Println(err)
 	}
 
-	imageId, imageChecksum, ImageVersion, err := SelectImage(string(imageJsonList), sampleVersion)
+	imageId, imageName, imageChecksum, ImageVersion, err := SelectImage(string(imageJsonList), sampleVersion)
 	if err != nil {
 		fmt.Println(err)
 	}
 
 	assert.Equal(t, imageId, sampleId)
+	assert.Equal(t, imageName, sampleName)
 	assert.Equal(t, imageChecksum, sampleChecksum)
 	assert.Equal(t, ImageVersion, sampleVersion)
 	assert.NoError(t, err)
@@ -73,14 +74,15 @@ func TestPickLatestImage(t *testing.T) {
 
 	var image []ImageVersion
 
-	image = append(image, ImageVersion{ID: sampleId, Checksum: sampleChecksum, Version: version})
+	image = append(image, ImageVersion{ID: sampleId, Name: sampleName, Checksum: sampleChecksum, Version: version})
 
-	imageId, imageChecksum, imageVersion, err := PickLatestImage(image, sampleVersion)
+	imageId, imageName, imageChecksum, imageVersion, err := PickLatestImage(image, sampleVersion)
 	if err != nil {
 		fmt.Println(err)
 	}
 
 	assert.Equal(t, imageId, sampleId)
+	assert.Equal(t, imageName, sampleName)
 	assert.Equal(t, imageChecksum, sampleChecksum)
 	assert.Equal(t, imageVersion, sampleVersion)
 }
