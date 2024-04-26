@@ -14,6 +14,8 @@ import (
 
 	"github.com/Masterminds/semver/v3"
 	"gopkg.in/yaml.v3"
+
+	cert "github.com/Sashwat-K/hpcr-encryption-certificate"
 )
 
 // ExecCommand - function to run os commands
@@ -71,6 +73,12 @@ func CreateTempFile(data string) (string, error) {
 // RemoveTempFile - function to remove temp file
 func RemoveTempFile(filePath string) error {
 	return os.Remove(filePath)
+}
+
+// function to check if input data is JSON or not
+func IsJSON(str string) bool {
+	var js interface{}
+	return json.Unmarshal([]byte(str), &js) == nil
 }
 
 // EncodeToBase64 - function to encode string as base64
@@ -178,4 +186,13 @@ func GetDataFromLatestVersion(jsonData, version string) (string, string, error) 
 
 	// No matching version found
 	return "", "", fmt.Errorf("no matching version found for the given constraint")
+}
+
+// FetchEncryptionCertificate - function to get encryption certificate
+func FetchEncryptionCertificate(encryptionCertificate string) string {
+	if encryptionCertificate != "" {
+		return encryptionCertificate
+	} else {
+		return cert.EncryptionCertificate
+	}
 }

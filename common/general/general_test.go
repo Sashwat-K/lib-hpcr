@@ -6,6 +6,7 @@ import (
 	"os"
 	"testing"
 
+	cert "github.com/Sashwat-K/hpcr-encryption-certificate"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
 )
@@ -16,6 +17,14 @@ const (
 
 	sampleBase64Data        = "c2FzaHdhdGs="
 	sampleDecodedBase64Data = "sashwatk"
+
+	sampleCertificateJson = `{
+		"1.0.0": "data1",
+		"1.2.5": "data2",
+		"2.0.5": "data3",
+		"3.5.10": "data4",
+		"4.0.0": "data5"
+	}`
 )
 
 // Testcase to check ExecCommand() works
@@ -71,6 +80,13 @@ func TestRemoveTempFile(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.True(t, os.IsNotExist(err1), "The created file was removed and must not exist")
+}
+
+// Testcase to check if IsJSON() is able to check if input data is JSON or not
+func TestIsJson(t *testing.T) {
+	result := IsJSON(sampleCertificateJson)
+
+	assert.Equal(t, result, true)
 }
 
 // Testcase to check if EncodeToBase64() can encode string to base64
@@ -184,16 +200,9 @@ func TestCheckUrlExists(t *testing.T) {
 }
 
 func TestGetDataFromLatestVersion(t *testing.T) {
-	jsonData := `{
-		"1.0.0": "data1",
-		"1.2.5": "data2",
-		"2.0.5": "data3",
-		"3.5.10": "data4",
-		"4.0.0": "data5"
-	}`
 	versionConstraints := ">= 1.0.0, <= 3.5.10"
 
-	key, value, err := GetDataFromLatestVersion(jsonData, versionConstraints)
+	key, value, err := GetDataFromLatestVersion(sampleCertificateJson, versionConstraints)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -201,4 +210,11 @@ func TestGetDataFromLatestVersion(t *testing.T) {
 	assert.Equal(t, key, "3.5.10")
 	assert.Equal(t, value, "data4")
 	assert.NoError(t, err)
+}
+
+// Testcase to check if FetchEncryptionCertificate() fetches encryption certificate
+func TestFetchEncryptionCertificate(t *testing.T) {
+	result := FetchEncryptionCertificate("")
+
+	assert.Equal(t, result, cert.EncryptionCertificate)
 }
