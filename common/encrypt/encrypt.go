@@ -59,7 +59,12 @@ func EncryptContract(password string, section map[string]interface{}) (string, e
 		return "", err
 	}
 
-	contractPath, err := gen.CreateTempFile(contract)
+	return EncryptString(password, contract)
+}
+
+// EncryptString - function to encrypt string
+func EncryptString(password, section string) (string, error) {
+	contractPath, err := gen.CreateTempFile(section)
 	if err != nil {
 		return "", err
 	}

@@ -103,6 +103,27 @@ func TestEncryptContract(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+// Testcase to check if EncryptString() is able to encrypt string
+func TestEncryptString(t *testing.T) {
+	password, err := RandomPasswordGenerator()
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	contract := `
+	workload: |
+		type: workload
+	`
+
+	result, err := EncryptString(password, contract)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	assert.NotEmpty(t, result, "Encrypted workload did not get generated")
+	assert.NoError(t, err)
+}
+
 // Testcase to check if EncryptFinalStr() is able to generate hyper-protect-basic.<password>.<workload>
 func TestEncryptFinalStr(t *testing.T) {
 	var contractMap map[string]interface{}
