@@ -14,8 +14,8 @@ const (
 	privateKeyPath        = "../samples/attestation/private.pem"
 )
 
-// Testcase to check if GetAttestationRecords() retrieves attestation records from encrypted data
-func TestGetAttestationRecords(t *testing.T) {
+// Testcase to check if HpcrGetAttestationRecords() retrieves attestation records from encrypted data
+func TestHpcrGetAttestationRecords(t *testing.T) {
 	encChecksumPath, err := os.Open(encryptedChecksumPath)
 	if err != nil {
 		fmt.Println(err)
@@ -38,7 +38,7 @@ func TestGetAttestationRecords(t *testing.T) {
 		fmt.Println(err)
 	}
 
-	result, err := GetAttestationRecords(string(encChecksum), string(privateKeyData))
+	result, err := HpcrGetAttestationRecords(string(encChecksum), string(privateKeyData))
 	if err != nil {
 		fmt.Println(err)
 	}

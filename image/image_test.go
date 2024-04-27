@@ -36,7 +36,7 @@ func TestSelectImage(t *testing.T) {
 		fmt.Println(err)
 	}
 
-	imageId, imageName, imageChecksum, ImageVersion, err := SelectImage(string(imageJsonList), sampleVersion)
+	imageId, imageName, imageChecksum, ImageVersion, err := HpcrSelectImage(string(imageJsonList), sampleVersion)
 	if err != nil {
 		fmt.Println(err)
 	}

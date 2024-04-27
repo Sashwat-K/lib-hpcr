@@ -22,7 +22,7 @@ var (
 func TestGetEncryptionCertificateFromJson(t *testing.T) {
 	version := "> 1.0.0"
 
-	key, value, err := GetEncryptionCertificateFromJson(sampleJsonData, version)
+	key, value, err := HpcrGetEncryptionCertificateFromJson(sampleJsonData, version)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -34,7 +34,7 @@ func TestGetEncryptionCertificateFromJson(t *testing.T) {
 
 // Testcase to check if DownloadEncryptionCertificates() is able to download encryption certificates as per constraint
 func TestDownloadEncryptionCertificates(t *testing.T) {
-	certs, err := DownloadEncryptionCertificates(sampleEncryptionCertVersions)
+	certs, err := HpcrDownloadEncryptionCertificates(sampleEncryptionCertVersions)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -45,14 +45,14 @@ func TestDownloadEncryptionCertificates(t *testing.T) {
 
 // Testcase to check both DownloadEncryptionCertificates() and GetEncryptionCertificateFromJson() together
 func TestCombined(t *testing.T) {
-	certs, err := DownloadEncryptionCertificates(sampleEncryptionCertVersions)
+	certs, err := HpcrDownloadEncryptionCertificates(sampleEncryptionCertVersions)
 	if err != nil {
 		fmt.Println(err)
 	}
 
 	version := "> 1.0.14"
 
-	key, _, err := GetEncryptionCertificateFromJson(certs, version)
+	key, _, err := HpcrGetEncryptionCertificateFromJson(certs, version)
 	if err != nil {
 		fmt.Println(err)
 	}

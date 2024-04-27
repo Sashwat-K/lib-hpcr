@@ -36,8 +36,8 @@ var (
 	reHyperProtectName = regexp.MustCompile(`^ibm-hyper-protect-container-runtime-(\d+)-(\d+)-s390x-(\d+)$`)
 )
 
-// SelectImage - function to return the latest HPVS image
-func SelectImage(imageJsonData, versionSpec string) (string, string, string, string, error) {
+// HpcrSelectImage - function to return the latest HPVS image
+func HpcrSelectImage(imageJsonData, versionSpec string) (string, string, string, string, error) {
 	var images []Image
 	var hyperProtectImages []ImageVersion
 

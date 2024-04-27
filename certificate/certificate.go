@@ -19,13 +19,13 @@ type CertSpec struct {
 	Patch string
 }
 
-// GetEncryptionCertificateFromJson - function to get encryption certificate from encryption certificate JSON data
-func GetEncryptionCertificateFromJson(encryptionCertificateJson, version string) (string, string, error) {
+// HpcrGetEncryptionCertificateFromJson - function to get encryption certificate from encryption certificate JSON data
+func HpcrGetEncryptionCertificateFromJson(encryptionCertificateJson, version string) (string, string, error) {
 	return gen.GetDataFromLatestVersion(encryptionCertificateJson, version)
 }
 
-// DownloadEncryptionCertificates - function to download encryption certificates for specified versions
-func DownloadEncryptionCertificates(versionList []string) (string, error) {
+// HpcrDownloadEncryptionCertificates - function to download encryption certificates for specified versions
+func HpcrDownloadEncryptionCertificates(versionList []string) (string, error) {
 	var verCertMap = make(map[string]string)
 
 	for _, version := range versionList {
