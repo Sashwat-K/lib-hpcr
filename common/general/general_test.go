@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"testing"
 
 	cert "github.com/Sashwat-K/hpcr-encryption-certificate"
@@ -25,6 +26,9 @@ const (
 		"3.5.10": "data4",
 		"4.0.0": "data5"
 	}`
+
+	sampleComposeFolder = "../../samples/tgz"
+	composeTgzBase64    = "H4sIAAAAAAAA/9SSQU4DMQxFs+YUuUBbOySeyay4iuNxmagZBSWFqrdHBYS6ALGZDW/zZPkvbOnPVU7adlLXl9p1f+W1mK0BACDvb8YhwL0/cIgGPeEjEtHgDCB5JGNh80t+4LWfuRmAzn258Pn0W+6v/dcv3/4ndG1vWbRPD9YuWkrdXWor8220Nq/8rJP97Mg+10PJqXG7Hu6ST31hF2jyaR5GREwU0XOMc5JAoMQOlFMYjkeiEFjZ8wgSIIEEHzHSKEmc0jsAAAD//w=="
 )
 
 // Testcase to check ExecCommand() works
@@ -76,10 +80,28 @@ func TestRemoveTempFile(t *testing.T) {
 
 	err = RemoveTempFile(tmpfile)
 
-	_, err1 := os.Stat(tmpfile)
+	err1 := CheckFileFolderExists(tmpfile)
 
 	assert.NoError(t, err)
-	assert.True(t, os.IsNotExist(err1), "The created file was removed and must not exist")
+	assert.False(t, err1, "The created file was removed and must not exist")
+}
+
+// Testcase to check if ListFoldersAndFiles() is able to list files and folders under a folder
+func TestListFoldersAndFiles(t *testing.T) {
+	result, err := ListFoldersAndFiles(sampleComposeFolder)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	assert.Contains(t, result, filepath.Join(sampleComposeFolder, "docker-compose.yaml"))
+	assert.NoError(t, err)
+}
+
+// Testcase to check if CheckFileFolderExists() is able check if file or folder exists
+func TestCheckFileFolderExists(t *testing.T) {
+	result := CheckFileFolderExists(sampleComposeFolder)
+
+	assert.True(t, result)
 }
 
 // Testcase to check if IsJSON() is able to check if input data is JSON or not
@@ -217,4 +239,20 @@ func TestFetchEncryptionCertificate(t *testing.T) {
 	result := FetchEncryptionCertificate("")
 
 	assert.Equal(t, result, cert.EncryptionCertificate)
+}
+
+// Testcase to check if TestGenerateTgzBase64() is able generate base64 of compose tgz
+func TestGenerateTgzBase64(t *testing.T) {
+	filesFoldersList, err := ListFoldersAndFiles(sampleComposeFolder)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	result, err := GenerateTgzBase64(filesFoldersList)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	assert.Equal(t, result, composeTgzBase64)
+	assert.NoError(t, err)
 }

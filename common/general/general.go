@@ -1,7 +1,9 @@
 package general
 
 import (
+	"archive/tar"
 	"bytes"
+	"compress/gzip"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -9,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"sort"
 	"strings"
 
@@ -75,7 +78,30 @@ func RemoveTempFile(filePath string) error {
 	return os.Remove(filePath)
 }
 
-// function to check if input data is JSON or not
+// ListFoldersAndFiles - function to list files and folder under a folder
+func ListFoldersAndFiles(folderPath string) ([]string, error) {
+	var filesFoldersList []string
+
+	contents, err := os.ReadDir(folderPath)
+	if err != nil {
+		return nil, nil
+	}
+
+	for _, content := range contents {
+		fullPath := filepath.Join(folderPath, content.Name())
+		filesFoldersList = append(filesFoldersList, fullPath)
+	}
+
+	return filesFoldersList, nil
+}
+
+// CheckFileFolderExists - function to check if file or folder exists
+func CheckFileFolderExists(folderFilePath string) bool {
+	_, err := os.Stat(folderFilePath)
+	return !os.IsNotExist(err)
+}
+
+// IsJSON - function to check if input data is JSON or not
 func IsJSON(str string) bool {
 	var js interface{}
 	return json.Unmarshal([]byte(str), &js) == nil
@@ -195,4 +221,61 @@ func FetchEncryptionCertificate(encryptionCertificate string) string {
 	} else {
 		return cert.EncryptionCertificate
 	}
+}
+
+// GenerateTgzBase64 - function to generate tgz and return it as base64
+func GenerateTgzBase64(folderFilesPath []string) (string, error) {
+	var buf bytes.Buffer
+
+	gw := gzip.NewWriter(&buf)
+	defer gw.Close()
+
+	tw := tar.NewWriter(gw)
+	defer tw.Close()
+
+	for _, path := range folderFilesPath {
+		err := filepath.Walk(path, func(filePath string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+
+			relPath, err := filepath.Rel(path, filePath)
+			if err != nil {
+				return err
+			}
+
+			header, err := tar.FileInfoHeader(info, relPath)
+			if err != nil {
+				return err
+			}
+
+			if err := tw.WriteHeader(header); err != nil {
+				return err
+			}
+
+			if !info.IsDir() {
+				file, err := os.Open(filePath)
+				if err != nil {
+					return err
+				}
+				defer file.Close()
+
+				if _, err := io.Copy(tw, file); err != nil {
+					return err
+				}
+			}
+
+			return nil
+		})
+
+		if err != nil {
+			return "", err
+		}
+	}
+
+	if err := gw.Flush(); err != nil {
+		return "", err
+	}
+
+	return EncodeToBase64(buf.String()), nil
 }
