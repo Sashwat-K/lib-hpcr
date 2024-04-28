@@ -7,7 +7,7 @@ import (
 	gen "github.com/Sashwat-K/lib-hpcr/common/general"
 )
 
-// function to generate base64 data from string
+// HpcrText - function to generate base64 data from string
 func HpcrText(plainText string) (string, error) {
 	if plainText == "" {
 		return "", fmt.Errorf("input is empty")
@@ -15,7 +15,7 @@ func HpcrText(plainText string) (string, error) {
 	return gen.EncodeToBase64(plainText), nil
 }
 
-// function to generate base64 data from JSON string
+// HpcrJson - function to generate base64 data from JSON string
 func HpcrJson(plainJson string) (string, error) {
 	if !gen.IsJSON(plainJson) {
 		return "", fmt.Errorf("not a JSON data")
@@ -23,12 +23,12 @@ func HpcrJson(plainJson string) (string, error) {
 	return gen.EncodeToBase64(plainJson), nil
 }
 
-// function to generate encrypted Hyper protect data from plain text
+// HpcrEncryptedtext - function to generate encrypted Hyper protect data from plain text
 func HpcrEncryptedtext(plainText, encryptionCertificate string) (string, error) {
 	return Encrypter(plainText, encryptionCertificate)
 }
 
-// function to generate encrypted hyper protect data from plain JSON data
+// HpcrEncryptedJson - function to generate encrypted hyper protect data from plain JSON data
 func HpcrEncryptedJson(plainJson, encryptionCertificate string) (string, error) {
 	if !gen.IsJSON(plainJson) {
 		return "", fmt.Errorf("contract is not a JSON data")
@@ -36,7 +36,26 @@ func HpcrEncryptedJson(plainJson, encryptionCertificate string) (string, error) 
 	return Encrypter(plainJson, encryptionCertificate)
 }
 
-// function to generate encrypted hyper protect data from plain string
+// HpcrTgz - function to generate base64 of tar.tgz which was prepared from docker compose/podman files
+func HpcrTgz(folderPath string) (string, error) {
+	if !gen.CheckFileFolderExists(folderPath) {
+		return "", fmt.Errorf("folder doesn't exists - %s", folderPath)
+	}
+
+	filesFoldersList, err := gen.ListFoldersAndFiles(folderPath)
+	if err != nil {
+		return "", err
+	}
+
+	tgzBase64, err := gen.GenerateTgzBase64(filesFoldersList)
+	if err != nil {
+		return "", err
+	}
+
+	return tgzBase64, nil
+}
+
+// Encrypter - function to generate encrypted hyper protect data from plain string
 func Encrypter(stringText, encryptionCertificate string) (string, error) {
 	encCert := gen.FetchEncryptionCertificate(encryptionCertificate)
 
@@ -57,5 +76,3 @@ func Encrypter(stringText, encryptionCertificate string) (string, error) {
 
 	return enc.EncryptFinalStr(encodedEncryptedPassowrd, encryptedString), nil
 }
-
-//
