@@ -4,7 +4,9 @@ import (
 	"archive/tar"
 	"bytes"
 	"compress/gzip"
+	"crypto/sha256"
 	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -112,6 +114,26 @@ func EncodeToBase64(input string) string {
 	return base64.StdEncoding.EncodeToString([]byte(input))
 }
 
+// DecodeBase64String - function to decode base64 string
+func DecodeBase64String(base64Data string) (string, error) {
+	decodedData, err := base64.StdEncoding.DecodeString(base64Data)
+	if err != nil {
+		return "", err
+	}
+
+	return string(decodedData), nil
+}
+
+// GenerateSha256 - function to generate SHA256 of a string
+func GenerateSha256(input string) string {
+	hasher := sha256.New()
+	hasher.Write([]byte(input))
+
+	hashedBytes := hasher.Sum(nil)
+
+	return hex.EncodeToString(hashedBytes)
+}
+
 // MapToYaml - function to convert string map to YAML
 func MapToYaml(m map[string]interface{}) (string, error) {
 	// Marshal the map into a YAML string.
@@ -150,16 +172,6 @@ func CertificateDownloader(url string) (string, error) {
 	}
 
 	return string(body), nil
-}
-
-// DecodeBase64String - function to decode base64 string
-func DecodeBase64String(base64Data string) (string, error) {
-	decodedData, err := base64.StdEncoding.DecodeString(base64Data)
-	if err != nil {
-		return "", err
-	}
-
-	return string(decodedData), nil
 }
 
 // GetEncryptPassWorkload - function to get encrypted password and encrypted workload from data

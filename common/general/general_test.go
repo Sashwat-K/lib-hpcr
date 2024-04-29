@@ -16,8 +16,9 @@ const (
 	simpleContractPath     = "../../samples/simple_contract.yaml"
 	certificateDownloadUrl = "https://cloud.ibm.com/media/docs/downloads/hyper-protect-container-runtime/ibm-hyper-protect-container-runtime-1-0-s390x-15-encrypt.crt"
 
-	sampleBase64Data        = "c2FzaHdhdGs="
-	sampleDecodedBase64Data = "sashwatk"
+	sampleStringData   = "sashwatk"
+	sampleBase64Data   = "c2FzaHdhdGs="
+	sampleDataChecksum = "05fb716cba07a0cdda231f1aa19621ce9e183a4fb6e650b459bc3c5db7593e42"
 
 	sampleCertificateJson = `{
 		"1.0.0": "data1",
@@ -112,9 +113,30 @@ func TestIsJson(t *testing.T) {
 
 // Testcase to check if EncodeToBase64() can encode string to base64
 func TestEncodeToBase64(t *testing.T) {
-	result := EncodeToBase64(sampleDecodedBase64Data)
+	result := EncodeToBase64(sampleStringData)
 
 	assert.Equal(t, result, sampleBase64Data)
+}
+
+// Testcase to check if DecodeBase64String() can decode base64 string
+func TestDecodeBase64String(t *testing.T) {
+	result, err := DecodeBase64String(sampleBase64Data)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Println(result)
+
+	assert.Equal(t, sampleStringData, result)
+	assert.NoError(t, err)
+}
+
+// Testcase to check if GenerateSha256() is able to generate SHA256 of string
+func TestGenerateSha256(t *testing.T) {
+	result := GenerateSha256(sampleStringData)
+
+	fmt.Println(result)
+	assert.NotEmpty(t, result)
 }
 
 // Testcase to check if MapToYaml() can convert Map to YAML string
@@ -184,19 +206,6 @@ func TestCertificateDownloader(t *testing.T) {
 	}
 
 	assert.Contains(t, certificate, "-----BEGIN CERTIFICATE-----")
-	assert.NoError(t, err)
-}
-
-// Testcase to check if DecodeBase64String() can decode base64 string
-func TestDecodeBase64String(t *testing.T) {
-	result, err := DecodeBase64String(sampleBase64Data)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	fmt.Println(result)
-
-	assert.Equal(t, sampleDecodedBase64Data, result)
 	assert.NoError(t, err)
 }
 
