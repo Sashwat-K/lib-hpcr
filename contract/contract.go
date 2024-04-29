@@ -67,7 +67,7 @@ func Encrypter(stringText, encryptionCertificate string) (string, string, error)
 		fmt.Println(err)
 	}
 
-	encodedEncryptedPassowrd, err := enc.EncryptPassword(password, encCert)
+	encodedEncryptedPassword, err := enc.EncryptPassword(password, encCert)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -77,5 +77,5 @@ func Encrypter(stringText, encryptionCertificate string) (string, string, error)
 		fmt.Println(err)
 	}
 
-	return enc.EncryptFinalStr(encodedEncryptedPassowrd, encryptedString), gen.GenerateSha256(stringText), nil
+	return enc.EncryptFinalStr(encodedEncryptedPassword, encryptedString), gen.GenerateSha256(stringText), nil
 }
