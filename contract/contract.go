@@ -7,20 +7,20 @@ import (
 	gen "github.com/Sashwat-K/lib-hpcr/common/general"
 )
 
-// HpcrText - function to generate base64 data from string
-func HpcrText(plainText string) (string, error) {
+// HpcrText - function to generate base64 data and checksum from string
+func HpcrText(plainText string) (string, string, error) {
 	if plainText == "" {
-		return "", fmt.Errorf("input is empty")
+		return "", "", fmt.Errorf("input is empty")
 	}
-	return gen.EncodeToBase64(plainText), nil
+	return gen.EncodeToBase64(plainText), gen.GenerateSha256(plainText), nil
 }
 
-// HpcrJson - function to generate base64 data from JSON string
-func HpcrJson(plainJson string) (string, error) {
+// HpcrJson - function to generate base64 data and checksum from JSON string
+func HpcrJson(plainJson string) (string, string, error) {
 	if !gen.IsJSON(plainJson) {
-		return "", fmt.Errorf("not a JSON data")
+		return "", "", fmt.Errorf("not a JSON data")
 	}
-	return gen.EncodeToBase64(plainJson), nil
+	return gen.EncodeToBase64(plainJson), gen.GenerateSha256(plainJson), nil
 }
 
 // HpcrEncryptedtext - function to generate encrypted Hyper protect data from plain text
