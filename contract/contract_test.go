@@ -45,24 +45,26 @@ func TestHpcrJson(t *testing.T) {
 	assert.Equal(t, sha256, sampleChecksumJson)
 }
 
-// Testcase to check if TestHpcrEncryptedtext() is able to encrypt text
+// Testcase to check if TestHpcrEncryptedtext() is able to encrypt text and generate SHA256
 func TestHpcrEncryptedtext(t *testing.T) {
-	result, err := HpcrEncryptedtext(sampleStringData, "")
+	result, sha256, err := HpcrEncryptedtext(sampleStringData, "")
 	if err != nil {
 		fmt.Println(err)
 	}
 
 	assert.Contains(t, result, "hyper-protect-basic.")
+	assert.Equal(t, sha256, sampleDataChecksum)
 }
 
-// Testcase to check if TestHpcrEncryptedJson() is able to encrypt JSON
+// Testcase to check if TestHpcrEncryptedJson() is able to encrypt JSON and generate SHA256
 func TestHpcrEncryptedJson(t *testing.T) {
-	result, err := HpcrEncryptedJson(sampleStringJson, "")
+	result, sha256, err := HpcrEncryptedJson(sampleStringJson, "")
 	if err != nil {
 		fmt.Println(err)
 	}
 
 	assert.Contains(t, result, "hyper-protect-basic.")
+	assert.Equal(t, sha256, sampleChecksumJson)
 }
 
 // Testcase to check if HpcrTgz() is able to generate base64 of tar.tgz
@@ -76,11 +78,13 @@ func TestHpcrTgz(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+// Testcase to check if Encrypter() is able to encrypt and generate SHA256 from string
 func TestEncrypter(t *testing.T) {
-	result, err := Encrypter(sampleStringJson, "")
+	result, sha256, err := Encrypter(sampleStringJson, "")
 	if err != nil {
 		fmt.Println(err)
 	}
 
 	assert.Contains(t, result, "hyper-protect-basic.")
+	assert.Equal(t, sha256, sampleChecksumJson)
 }

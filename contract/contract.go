@@ -23,15 +23,18 @@ func HpcrJson(plainJson string) (string, string, error) {
 	return gen.EncodeToBase64(plainJson), gen.GenerateSha256(plainJson), nil
 }
 
-// HpcrEncryptedtext - function to generate encrypted Hyper protect data from plain text
-func HpcrEncryptedtext(plainText, encryptionCertificate string) (string, error) {
+// HpcrEncryptedtext - function to generate encrypted Hyper protect data and SHA256 from plain text
+func HpcrEncryptedtext(plainText, encryptionCertificate string) (string, string, error) {
+	if plainText == "" {
+		return "", "", fmt.Errorf("input text is empty")
+	}
 	return Encrypter(plainText, encryptionCertificate)
 }
 
-// HpcrEncryptedJson - function to generate encrypted hyper protect data from plain JSON data
-func HpcrEncryptedJson(plainJson, encryptionCertificate string) (string, error) {
+// HpcrEncryptedJson - function to generate encrypted hyper protect data and SHA256 from plain JSON data
+func HpcrEncryptedJson(plainJson, encryptionCertificate string) (string, string, error) {
 	if !gen.IsJSON(plainJson) {
-		return "", fmt.Errorf("contract is not a JSON data")
+		return "", "", fmt.Errorf("contract is not a JSON data")
 	}
 	return Encrypter(plainJson, encryptionCertificate)
 }
@@ -56,7 +59,7 @@ func HpcrTgz(folderPath string) (string, error) {
 }
 
 // Encrypter - function to generate encrypted hyper protect data from plain string
-func Encrypter(stringText, encryptionCertificate string) (string, error) {
+func Encrypter(stringText, encryptionCertificate string) (string, string, error) {
 	encCert := gen.FetchEncryptionCertificate(encryptionCertificate)
 
 	password, err := enc.RandomPasswordGenerator()
@@ -74,5 +77,5 @@ func Encrypter(stringText, encryptionCertificate string) (string, error) {
 		fmt.Println(err)
 	}
 
-	return enc.EncryptFinalStr(encodedEncryptedPassowrd, encryptedString), nil
+	return enc.EncryptFinalStr(encodedEncryptedPassowrd, encryptedString), gen.GenerateSha256(stringText), nil
 }
