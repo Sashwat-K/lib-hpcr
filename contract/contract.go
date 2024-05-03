@@ -5,6 +5,7 @@ import (
 
 	enc "github.com/Sashwat-K/lib-hpcr/common/encrypt"
 	gen "github.com/Sashwat-K/lib-hpcr/common/general"
+	"gopkg.in/yaml.v3"
 )
 
 // HpcrText - function to generate base64 data and checksum from string
@@ -56,6 +57,59 @@ func HpcrTgz(folderPath string) (string, error) {
 	}
 
 	return tgzBase64, nil
+}
+
+// HpcrContractSignedEncrypted - function to generate Signed and Encrypted contract
+func HpcrContractSignedEncrypted(contract, privateKey, encryptionCertificate string) (string, error) {
+	var contractMap map[string]interface{}
+
+	if contract == "" || privateKey == "" {
+		return "", fmt.Errorf("either contract or private key not parsed")
+	}
+
+	encryptCertificate := gen.FetchEncryptionCertificate(encryptionCertificate)
+
+	err := yaml.Unmarshal([]byte(contract), &contractMap)
+	if err != nil {
+		return "", err
+	}
+
+	workloadData, err := gen.MapToYaml(contractMap["workload"].(map[string]interface{}))
+	if err != nil {
+		return "", err
+	}
+
+	encryptedWorkload, _, err := Encrypter(workloadData, encryptCertificate)
+	if err != nil {
+		return "", err
+	}
+
+	publicKey, err := enc.GeneratePublicKey(privateKey)
+	if err != nil {
+		return "", err
+	}
+
+	updatedEnv, err := gen.KeyValueInjector(contractMap["env"].(map[string]interface{}), "signingKey", gen.EncodeToBase64(publicKey))
+	if err != nil {
+		return "", err
+	}
+
+	encryptedEnv, _, err := Encrypter(updatedEnv, encryptCertificate)
+	if err != nil {
+		return "", err
+	}
+
+	workloadEnvSignature, err := enc.SignContract(encryptedWorkload, encryptedEnv, privateKey)
+	if err != nil {
+		return "", err
+	}
+
+	finalContract, err := enc.GenFinalSignedContract(encryptedWorkload, encryptedEnv, workloadEnvSignature)
+	if err != nil {
+		return "", err
+	}
+
+	return finalContract, nil
 }
 
 // Encrypter - function to generate encrypted hyper protect data from plain string

@@ -2,9 +2,14 @@ package contract
 
 import (
 	"fmt"
+	"io"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"gopkg.in/yaml.v3"
+
+	gen "github.com/Sashwat-K/lib-hpcr/common/general"
 )
 
 const (
@@ -21,6 +26,9 @@ const (
 	sampleChecksumJson = "f932f8ad556280f232f4b42d55b24ce7d2e909d3195ef60d49e92d49b735de2b"
 
 	sampleComposeFolderPath = "../samples/tgz"
+	simpleContractPath      = "../samples/simple_contract.yaml"
+
+	samplePrivateKeyPath = "../samples/encrypt/private.pem"
 )
 
 // Testcase to check if TestHpcrText() is able to encode text and generate SHA256
@@ -70,6 +78,51 @@ func TestHpcrEncryptedJson(t *testing.T) {
 // Testcase to check if HpcrTgz() is able to generate base64 of tar.tgz
 func TestHpcrTgz(t *testing.T) {
 	result, err := HpcrTgz(sampleComposeFolderPath)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	assert.NotEmpty(t, result)
+	assert.NoError(t, err)
+}
+
+// Testcase to check if HpcrContractSignedEncrypted() is able to generate
+func TestHpcrContractSignedEncrypted(t *testing.T) {
+	var contractMap map[string]interface{}
+
+	file, err := os.Open(simpleContractPath)
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer file.Close()
+
+	contract, err := io.ReadAll(file)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	err = yaml.Unmarshal([]byte(contract), &contractMap)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	privateKeyFile, err := os.Open(samplePrivateKeyPath)
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer privateKeyFile.Close()
+
+	privateKey, err := io.ReadAll(privateKeyFile)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	contractStr, err := gen.MapToYaml(contractMap)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	result, err := HpcrContractSignedEncrypted(contractStr, string(privateKey), "")
 	if err != nil {
 		fmt.Println(err)
 	}
