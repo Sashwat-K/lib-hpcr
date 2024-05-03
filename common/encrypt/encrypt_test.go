@@ -72,7 +72,7 @@ func TestGeneratePublicKey(t *testing.T) {
 	}
 
 	assert.Equal(t, result, string(publicKey))
-	assert.NotEmpty(t, err)
+	assert.NoError(t, err)
 }
 
 // Testcase to check if RandomPasswordGenerator() is able to generate random password
