@@ -22,6 +22,21 @@ func OpensslCheck() error {
 	return nil
 }
 
+// GeneratePublicKey - function to generate public key from private key
+func GeneratePublicKey(privateKey string) (string, error) {
+	privateKeyPath, err := gen.CreateTempFile(privateKey)
+	if err != nil {
+		return "", err
+	}
+
+	publicKey, err := gen.ExecCommand("openssl", "", "rsa", "-in", privateKeyPath, "-pubout")
+	if err != nil {
+		return "", err
+	}
+
+	return publicKey, nil
+}
+
 // RandomPasswordGenerator - function to generate random password
 func RandomPasswordGenerator() (string, error) {
 	randomPassword, err := gen.ExecCommand("openssl", "", "rand", fmt.Sprint(keylen))

@@ -31,6 +31,9 @@ const (
 	sampleCsrMailId   = "sashwat.k@ibm.com"
 
 	sampleExpiryDays = 365
+
+	simplePrivateKeyPath = "../../samples/encrypt/private.pem"
+	simplePublicKeyPath  = "../../samples/encrypt/public.pem"
 )
 
 // Testcase to check if OpensslCheck() is able to check if openssl is present in the system or not
@@ -38,6 +41,37 @@ func TestOpensslCheck(t *testing.T) {
 	err := OpensslCheck()
 
 	assert.NoError(t, err)
+}
+
+func TestGeneratePublicKey(t *testing.T) {
+	privateKeyFile, err := os.Open(simplePrivateKeyPath)
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer privateKeyFile.Close()
+
+	privateKey, err := io.ReadAll(privateKeyFile)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	publicKeyFile, err := os.Open(simplePublicKeyPath)
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer publicKeyFile.Close()
+
+	publicKey, err := io.ReadAll(publicKeyFile)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	result, err := GeneratePublicKey(string(privateKey))
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	assert.Equal(t, result, string(publicKey))
 }
 
 // Testcase to check if RandomPasswordGenerator() is able to generate random password
