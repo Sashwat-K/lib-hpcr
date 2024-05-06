@@ -24,16 +24,16 @@ func HpcrJson(plainJson string) (string, string, error) {
 	return gen.EncodeToBase64(plainJson), gen.GenerateSha256(plainJson), nil
 }
 
-// HpcrEncryptedtext - function to generate encrypted Hyper protect data and SHA256 from plain text
-func HpcrEncryptedtext(plainText, encryptionCertificate string) (string, string, error) {
+// HpcrTextEncrypted - function to generate encrypted Hyper protect data and SHA256 from plain text
+func HpcrTextEncrypted(plainText, encryptionCertificate string) (string, string, error) {
 	if plainText == "" {
 		return "", "", fmt.Errorf("input text is empty")
 	}
 	return Encrypter(plainText, encryptionCertificate)
 }
 
-// HpcrEncryptedJson - function to generate encrypted hyper protect data and SHA256 from plain JSON data
-func HpcrEncryptedJson(plainJson, encryptionCertificate string) (string, string, error) {
+// HpcrJsonEncrypted - function to generate encrypted hyper protect data and SHA256 from plain JSON data
+func HpcrJsonEncrypted(plainJson, encryptionCertificate string) (string, string, error) {
 	if !gen.IsJSON(plainJson) {
 		return "", "", fmt.Errorf("contract is not a JSON data")
 	}

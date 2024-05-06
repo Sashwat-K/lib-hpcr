@@ -151,9 +151,9 @@ func TestHpcrJson(t *testing.T) {
 	assert.Equal(t, sha256, sampleChecksumJson)
 }
 
-// Testcase to check if TestHpcrEncryptedtext() is able to encrypt text and generate SHA256
-func TestHpcrEncryptedtext(t *testing.T) {
-	result, sha256, err := HpcrEncryptedtext(sampleStringData, "")
+// Testcase to check if TestHpcrTextEncrypted() is able to encrypt text and generate SHA256
+func TestHpcrTextEncrypted(t *testing.T) {
+	result, sha256, err := HpcrTextEncrypted(sampleStringData, "")
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -162,9 +162,9 @@ func TestHpcrEncryptedtext(t *testing.T) {
 	assert.Equal(t, sha256, sampleDataChecksum)
 }
 
-// Testcase to check if TestHpcrEncryptedJson() is able to encrypt JSON and generate SHA256
-func TestHpcrEncryptedJson(t *testing.T) {
-	result, sha256, err := HpcrEncryptedJson(sampleStringJson, "")
+// Testcase to check if TestHpcrJsonEncrypted() is able to encrypt JSON and generate SHA256
+func TestHpcrJsonEncrypted(t *testing.T) {
+	result, sha256, err := HpcrJsonEncrypted(sampleStringJson, "")
 	if err != nil {
 		fmt.Println(err)
 	}
