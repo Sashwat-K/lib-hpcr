@@ -59,6 +59,16 @@ func HpcrTgz(folderPath string) (string, error) {
 	return tgzBase64, nil
 }
 
+// HpcrTgzEncrypted - function to generate encrypted tgz
+func HpcrTgzEncrypted(folderPath, encryptionCertificate string) (string, string, error) {
+	tgzBase64, err := HpcrTgz(folderPath)
+	if err != nil {
+		return "", "", err
+	}
+
+	return Encrypter(tgzBase64, encryptionCertificate)
+}
+
 // HpcrContractSignedEncrypted - function to generate Signed and Encrypted contract
 func HpcrContractSignedEncrypted(contract, encryptionCertificate, privateKey string) (string, error) {
 	if contract == "" || privateKey == "" {

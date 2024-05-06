@@ -184,6 +184,16 @@ func TestHpcrTgz(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+func TestHpcrTgzEncrypted(t *testing.T) {
+	result, _, err := HpcrTgzEncrypted(sampleComposeFolderPath, "")
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	assert.Contains(t, result, "hyper-protect-basic.")
+	assert.NoError(t, err)
+}
+
 // Testcase to check if HpcrContractSignedEncrypted() is able to generate
 func TestHpcrContractSignedEncrypted(t *testing.T) {
 
