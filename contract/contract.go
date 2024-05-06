@@ -60,12 +60,52 @@ func HpcrTgz(folderPath string) (string, error) {
 }
 
 // HpcrContractSignedEncrypted - function to generate Signed and Encrypted contract
-func HpcrContractSignedEncrypted(contract, privateKey, encryptionCertificate string) (string, error) {
-	var contractMap map[string]interface{}
-
+func HpcrContractSignedEncrypted(contract, encryptionCertificate, privateKey string) (string, error) {
 	if contract == "" || privateKey == "" {
 		return "", fmt.Errorf("either contract or private key not parsed")
 	}
+
+	encryptCertificate := gen.FetchEncryptionCertificate(encryptionCertificate)
+
+	publicKey, err := enc.GeneratePublicKey(privateKey)
+	if err != nil {
+		return "", err
+	}
+
+	signedEncryptContract, err := EncryptWrapper(contract, encryptCertificate, privateKey, publicKey)
+	if err != nil {
+		return "", err
+	}
+
+	return signedEncryptContract, nil
+}
+
+// HpcrContractSignedEncryptedContractExpiry - function to generate sign with contract expiry enabled and encrypt contract (with CSR parameters and CSR file)
+func HpcrContractSignedEncryptedContractExpiry(contract, encryptionCertificate, privateKey, cacert, caKey, csrDataStr, csrPemData string, expiryDays int) (string, error) {
+	if contract == "" || privateKey == "" || cacert == "" || caKey == "" {
+		return "", fmt.Errorf("required parameters missing")
+	}
+
+	if csrPemData == "" && csrDataStr == "" || len(csrPemData) > 0 && len(csrDataStr) > 0 {
+		return "", fmt.Errorf("the CSR parameters and CSR PEM file are parsed together or both are nil")
+	}
+
+	signingCert, err := enc.CreateSigningCert(privateKey, cacert, caKey, csrDataStr, csrPemData, expiryDays)
+	if err != nil {
+		return "", err
+	}
+
+	finalContract, err := EncryptWrapper(contract, encryptionCertificate, privateKey, signingCert)
+	if err != nil {
+		return "", err
+	}
+
+	return finalContract, nil
+}
+
+// EncryptWrapper - wrapper function to sign (with and without contract expiry) and encrypt contract
+func EncryptWrapper(contract, encryptionCertificate, privateKey, publicKey string) (string, error) {
+	var contractMap map[string]interface{}
 
 	encryptCertificate := gen.FetchEncryptionCertificate(encryptionCertificate)
 
@@ -80,11 +120,6 @@ func HpcrContractSignedEncrypted(contract, privateKey, encryptionCertificate str
 	}
 
 	encryptedWorkload, _, err := Encrypter(workloadData, encryptCertificate)
-	if err != nil {
-		return "", err
-	}
-
-	publicKey, err := enc.GeneratePublicKey(privateKey)
 	if err != nil {
 		return "", err
 	}

@@ -1,15 +1,13 @@
 package contract
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"gopkg.in/yaml.v3"
-
-	gen "github.com/Sashwat-K/lib-hpcr/common/general"
 )
 
 const (
@@ -29,7 +27,107 @@ const (
 	simpleContractPath      = "../samples/simple_contract.yaml"
 
 	samplePrivateKeyPath = "../samples/encrypt/private.pem"
+	samplePublicKeyPath  = "../samples/encrypt/public.pem"
+
+	sampleCePrivateKeyPath   = "../samples/contract-expiry/private.pem"
+	sampleCeCaCertPath       = "../samples/contract-expiry/personal_ca.crt"
+	sampleCeCaKeyPath        = "../samples/contract-expiry/personal_ca.pem"
+	sampleCeCsrPath          = "../samples/contract-expiry/csr.pem"
+	sampleContractExpiryDays = 365
 )
+
+var (
+	sampleCeCSRPems = map[string]interface{}{
+		"country":  "IN",
+		"state":    "Karnataka",
+		"location": "Bangalore",
+		"org":      "IBM",
+		"unit":     "ISDL",
+		"domain":   "HPVS",
+		"mail":     "sashwat.k@ibm.com",
+	}
+)
+
+// common - common function to pull data from files
+func common(testType string) (string, string, string, string, string, error) {
+	simpleContractFile, err := os.Open(simpleContractPath)
+	if err != nil {
+		return "", "", "", "", "", err
+	}
+	defer simpleContractFile.Close()
+
+	contract, err := io.ReadAll(simpleContractFile)
+	if err != nil {
+		return "", "", "", "", "", err
+	}
+
+	privateKeyFile, err := os.Open(samplePrivateKeyPath)
+	if err != nil {
+		return "", "", "", "", "", err
+	}
+	defer privateKeyFile.Close()
+
+	privateKey, err := io.ReadAll(privateKeyFile)
+	if err != nil {
+		return "", "", "", "", "", err
+	}
+
+	if testType == "TestHpcrContractSignedEncrypted" {
+		return string(contract), string(privateKey), "", "", "", nil
+	} else if testType == "TestEncryptWrapper" {
+		publicKeyFile, err := os.Open(samplePublicKeyPath)
+		if err != nil {
+			return "", "", "", "", "", err
+		}
+		defer privateKeyFile.Close()
+
+		publicKey, err := io.ReadAll(publicKeyFile)
+		if err != nil {
+			return "", "", "", "", "", err
+		}
+		return string(contract), string(privateKey), string(publicKey), "", "", nil
+	} else if testType == "TestHpcrContractSignedEncryptedContractExpiryCsrParams" || testType == "TestHpcrContractSignedEncryptedContractExpiryCsrPem" {
+		cePrivateKeyPath, err := os.Open(sampleCePrivateKeyPath)
+		if err != nil {
+			return "", "", "", "", "", err
+		}
+		defer cePrivateKeyPath.Close()
+
+		cePrivateKey, err := io.ReadAll(cePrivateKeyPath)
+		if err != nil {
+			return "", "", "", "", "", err
+		}
+
+		caCertPath, err := os.Open(sampleCeCaCertPath)
+		if err != nil {
+			fmt.Println("Error parsing CA certificate - ", err)
+			return "", "", "", "", "", err
+		}
+		defer caCertPath.Close()
+
+		caCert, err := io.ReadAll(caCertPath)
+		if err != nil {
+			fmt.Println(err)
+			return "", "", "", "", "", err
+		}
+
+		caKeyPath, err := os.Open(sampleCeCaKeyPath)
+		if err != nil {
+			fmt.Println("Error parsing CA certificate - ", err)
+			return "", "", "", "", "", err
+		}
+		defer caCertPath.Close()
+
+		caKey, err := io.ReadAll(caKeyPath)
+		if err != nil {
+			fmt.Println(err)
+			return "", "", "", "", "", err
+		}
+
+		return string(contract), string(cePrivateKey), "", string(caCert), string(caKey), err
+	}
+	return "", "", "", "", "", err
+}
 
 // Testcase to check if TestHpcrText() is able to encode text and generate SHA256
 func TestHpcrText(t *testing.T) {
@@ -88,41 +186,77 @@ func TestHpcrTgz(t *testing.T) {
 
 // Testcase to check if HpcrContractSignedEncrypted() is able to generate
 func TestHpcrContractSignedEncrypted(t *testing.T) {
-	var contractMap map[string]interface{}
 
-	file, err := os.Open(simpleContractPath)
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer file.Close()
-
-	contract, err := io.ReadAll(file)
+	contract, privateKey, _, _, _, err := common("TestHpcrContractSignedEncrypted")
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	err = yaml.Unmarshal([]byte(contract), &contractMap)
+	result, err := HpcrContractSignedEncrypted(contract, "", privateKey)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	privateKeyFile, err := os.Open(samplePrivateKeyPath)
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer privateKeyFile.Close()
+	assert.NotEmpty(t, result)
+	assert.NoError(t, err)
+}
 
-	privateKey, err := io.ReadAll(privateKeyFile)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	contractStr, err := gen.MapToYaml(contractMap)
+// Testcase to check if HpcrContractSignedEncryptedContractExpiry() is able to create signed and encrypted contract with contract expiry enabled with CSR parameters
+func TestHpcrContractSignedEncryptedContractExpiryCsrParams(t *testing.T) {
+	contract, privateKey, _, caCert, caKey, err := common("TestHpcrContractSignedEncryptedContractExpiryCsrParams")
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	result, err := HpcrContractSignedEncrypted(contractStr, string(privateKey), "")
+	csrParams, err := json.Marshal(sampleCeCSRPems)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	result, err := HpcrContractSignedEncryptedContractExpiry(contract, "", privateKey, caCert, caKey, string(csrParams), "", sampleContractExpiryDays)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	assert.NotEmpty(t, result)
+	assert.NoError(t, err)
+}
+
+// Testcase to check if HpcrContractSignedEncryptedContractExpiry() is able to create signed and encrypted contract with contract expiry enabled with CSR PEM data
+func TestHpcrContractSignedEncryptedContractExpiryCsrPem(t *testing.T) {
+	contract, privateKey, _, caCert, caKey, err := common("TestHpcrContractSignedEncryptedContractExpiryCsrPem")
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	csrPemFile, err := os.Open(sampleCeCsrPath)
+	if err != nil {
+		fmt.Println("Error parsing CSR - ", err)
+	}
+	defer csrPemFile.Close()
+
+	csr, err := io.ReadAll(csrPemFile)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	result, err := HpcrContractSignedEncryptedContractExpiry(contract, "", privateKey, caCert, caKey, "", string(csr), sampleContractExpiryDays)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	assert.NotEmpty(t, result)
+	assert.NoError(t, err)
+}
+
+// Testcase to check if EncryptWrapper() is able to sign and encrypt a contract
+func TestEncryptWrapper(t *testing.T) {
+	contract, privateKey, publicKey, _, _, err := common("TestEncryptWrapper")
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	result, err := EncryptWrapper(contract, "", privateKey, publicKey)
 	if err != nil {
 		fmt.Println(err)
 	}
