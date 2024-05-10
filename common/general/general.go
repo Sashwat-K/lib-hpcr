@@ -23,6 +23,19 @@ import (
 	cert "github.com/Sashwat-K/hpcr-encryption-certificate"
 )
 
+// CheckIfEmpty - function to check if given arguments are not empty
+func CheckIfEmpty(values ...interface{}) bool {
+	empty := false
+
+	for _, value := range values {
+		if value == "" {
+			empty = true
+		}
+	}
+
+	return empty
+}
+
 // ExecCommand - function to run os commands
 func ExecCommand(name string, stdinInput string, args ...string) (string, error) {
 	cmd := exec.Command(name, args...)
@@ -57,7 +70,6 @@ func ExecCommand(name string, stdinInput string, args ...string) (string, error)
 
 // CreateTempFile - function to create temp file
 func CreateTempFile(data string) (string, error) {
-
 	trimmedData := strings.TrimSpace(data)
 	tmpFile, err := os.CreateTemp("", "hpvs-")
 	if err != nil {

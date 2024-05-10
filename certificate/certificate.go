@@ -10,7 +10,8 @@ import (
 )
 
 const (
-	defaultEncCertUrlTemplate = "https://cloud.ibm.com/media/docs/downloads/hyper-protect-container-runtime/ibm-hyper-protect-container-runtime-{{.Major}}-{{.Minor}}-s390x-{{.Patch}}-encrypt.crt"
+	defaultEncCertUrlTemplate    = "https://cloud.ibm.com/media/docs/downloads/hyper-protect-container-runtime/ibm-hyper-protect-container-runtime-{{.Major}}-{{.Minor}}-s390x-{{.Patch}}-encrypt.crt"
+	missingParameterErrStatement = "required parameter missing"
 )
 
 type CertSpec struct {
@@ -21,11 +22,19 @@ type CertSpec struct {
 
 // HpcrGetEncryptionCertificateFromJson - function to get encryption certificate from encryption certificate JSON data
 func HpcrGetEncryptionCertificateFromJson(encryptionCertificateJson, version string) (string, string, error) {
+	if gen.CheckIfEmpty(encryptionCertificateJson, version) {
+		return "", "", fmt.Errorf(missingParameterErrStatement)
+	}
+
 	return gen.GetDataFromLatestVersion(encryptionCertificateJson, version)
 }
 
 // HpcrDownloadEncryptionCertificates - function to download encryption certificates for specified versions
 func HpcrDownloadEncryptionCertificates(versionList []string) (string, error) {
+	if gen.CheckIfEmpty(versionList) {
+		return "", fmt.Errorf(missingParameterErrStatement)
+	}
+
 	var verCertMap = make(map[string]string)
 
 	for _, version := range versionList {

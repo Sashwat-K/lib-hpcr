@@ -31,6 +31,13 @@ const (
 	sampleComposeFolder = "../../samples/tgz"
 )
 
+// Testcase to check if CheckIfEmpty() is able to identify empty variables
+func TestCheckIfEmpty(t *testing.T) {
+	result := CheckIfEmpty("")
+
+	assert.True(t, result)
+}
+
 // Testcase to check ExecCommand() works
 func TestExecCommand(t *testing.T) {
 	_, err := ExecCommand("openssl", "", "version")

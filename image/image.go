@@ -7,6 +7,8 @@ import (
 	"sort"
 
 	"github.com/Masterminds/semver/v3"
+
+	gen "github.com/Sashwat-K/lib-hpcr/common/general"
 )
 
 type (
@@ -36,8 +38,16 @@ var (
 	reHyperProtectName = regexp.MustCompile(`^ibm-hyper-protect-container-runtime-(\d+)-(\d+)-s390x-(\d+)$`)
 )
 
+const (
+	emptyParameterErrStatement = "required parameter is empty"
+)
+
 // HpcrSelectImage - function to return the latest HPVS image
 func HpcrSelectImage(imageJsonData, versionSpec string) (string, string, string, string, error) {
+	if gen.CheckIfEmpty(imageJsonData, versionSpec) {
+		return "", "", "", "", fmt.Errorf(emptyParameterErrStatement)
+	}
+
 	var images []Image
 	var hyperProtectImages []ImageVersion
 
@@ -69,6 +79,10 @@ func IsCandidateImage(img Image) bool {
 
 // PickLatestImage - function to pick the latest Hyper Protect Image
 func PickLatestImage(hyperProtectImages []ImageVersion, version string) (string, string, string, string, error) {
+	if gen.CheckIfEmpty(hyperProtectImages, version) {
+		return "", "", "", "", fmt.Errorf(emptyParameterErrStatement)
+	}
+
 	targetConstraint, err := semver.NewConstraint(version)
 	if err != nil {
 		return "", "", "", "", fmt.Errorf("error parsing target version constraint: %v", err)
