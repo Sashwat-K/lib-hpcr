@@ -11,7 +11,7 @@ import (
 
 const (
 	defaultEncCertUrlTemplate    = "https://cloud.ibm.com/media/docs/downloads/hyper-protect-container-runtime/ibm-hyper-protect-container-runtime-{{.Major}}-{{.Minor}}-s390x-{{.Patch}}-encrypt.crt"
-	missingParameterErrStatement = "required parameter missing"
+	missingParameterErrStatement = "required parameter is missing"
 )
 
 type CertSpec struct {
@@ -43,19 +43,19 @@ func HpcrDownloadEncryptionCertificates(versionList []string) (string, error) {
 		urlTemplate := template.New("url")
 		urlTemplate, err := urlTemplate.Parse(defaultEncCertUrlTemplate)
 		if err != nil {
-			return "", err
+			return "", fmt.Errorf("failed to create url template - %v", err)
 		}
 
 		builder := &strings.Builder{}
 		err = urlTemplate.Execute(builder, CertSpec{verSpec[0], verSpec[1], verSpec[2]})
 		if err != nil {
-			return "", err
+			return "", fmt.Errorf("failed to apply template - %v", err)
 		}
 
 		url := builder.String()
 		status, err := gen.CheckUrlExists(url)
 		if err != nil {
-			return "", err
+			return "", fmt.Errorf("failed to check if URL exists - %v", err)
 		}
 		if !status {
 			return "", fmt.Errorf("encryption certificate doesn't exist in %s", url)
@@ -63,7 +63,7 @@ func HpcrDownloadEncryptionCertificates(versionList []string) (string, error) {
 
 		cert, err := gen.CertificateDownloader(url)
 		if err != nil {
-			return "", err
+			return "", fmt.Errorf("failed to download encryption certificate - %v", err)
 		}
 
 		verCertMap[version] = cert
@@ -71,7 +71,7 @@ func HpcrDownloadEncryptionCertificates(versionList []string) (string, error) {
 
 	jsonBytes, err := json.Marshal(verCertMap)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to marshal JSON - %v", err)
 	}
 
 	return string(jsonBytes), nil

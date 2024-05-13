@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	missingParameterErrStatement = "required parameter missing"
+	missingParameterErrStatement = "required parameter is missing"
 )
 
 // HpcrGetAttestationRecords - function to get attestation records from encrypted data
@@ -20,12 +20,12 @@ func HpcrGetAttestationRecords(data, privateKey string) (string, error) {
 
 	password, err := attest.DecryptPassword(encodedEncryptedPassword, privateKey)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to decrypt password - %v", err)
 	}
 
 	attestationRecords, err := attest.DecryptWorkload(password, encodedEncryptedData)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to decrypt attestation records - %v", err)
 	}
 
 	return attestationRecords, nil

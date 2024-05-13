@@ -114,7 +114,7 @@ func ListFoldersAndFiles(folderPath string) ([]string, error) {
 
 	contents, err := os.ReadDir(folderPath)
 	if err != nil {
-		return nil, nil
+		return nil, err
 	}
 
 	for _, content := range contents {
@@ -221,12 +221,12 @@ func CheckUrlExists(url string) (bool, error) {
 func GetDataFromLatestVersion(jsonData, version string) (string, string, error) {
 	var dataMap map[string]string
 	if err := json.Unmarshal([]byte(jsonData), &dataMap); err != nil {
-		return "", "", fmt.Errorf("error unmarshaling JSON data: %v", err)
+		return "", "", fmt.Errorf("error unmarshaling JSON data - %v", err)
 	}
 
 	targetConstraint, err := semver.NewConstraint(version)
 	if err != nil {
-		return "", "", fmt.Errorf("error parsing target version constraint: %v", err)
+		return "", "", fmt.Errorf("error parsing target version constraint - %v", err)
 	}
 
 	var matchingVersions []*semver.Version
@@ -234,7 +234,7 @@ func GetDataFromLatestVersion(jsonData, version string) (string, string, error) 
 	for versionStr := range dataMap {
 		version, err := semver.NewVersion(versionStr)
 		if err != nil {
-			return "", "", fmt.Errorf("error parsing version: %v", err)
+			return "", "", fmt.Errorf("error parsing version - %v", err)
 		}
 
 		if targetConstraint.Check(version) {

@@ -54,7 +54,7 @@ func HpcrSelectImage(imageJsonData, versionSpec string) (string, string, string,
 	err := json.Unmarshal([]byte(imageJsonData), &images)
 	if err != nil {
 		fmt.Println("Error:", err)
-		return "", "", "", "", err
+		return "", "", "", "", fmt.Errorf("failed to unmarshal JSON - %v", err)
 	}
 
 	for _, image := range images {
@@ -85,7 +85,7 @@ func PickLatestImage(hyperProtectImages []ImageVersion, version string) (string,
 
 	targetConstraint, err := semver.NewConstraint(version)
 	if err != nil {
-		return "", "", "", "", fmt.Errorf("error parsing target version constraint: %v", err)
+		return "", "", "", "", fmt.Errorf("error parsing target version constraint - %v", err)
 	}
 
 	var matchingVersions []*semver.Version

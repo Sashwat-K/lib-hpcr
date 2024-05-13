@@ -59,12 +59,12 @@ func HpcrTgz(folderPath string) (string, error) {
 
 	filesFoldersList, err := gen.ListFoldersAndFiles(folderPath)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to get files and folder under path - %v", err)
 	}
 
 	tgzBase64, err := gen.GenerateTgzBase64(filesFoldersList)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to get base64 tgz - %v", err)
 	}
 
 	return tgzBase64, nil
@@ -94,12 +94,12 @@ func HpcrContractSignedEncrypted(contract, encryptionCertificate, privateKey str
 
 	publicKey, err := enc.GeneratePublicKey(privateKey)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to generate public key - %v", err)
 	}
 
 	signedEncryptContract, err := EncryptWrapper(contract, encryptCertificate, privateKey, publicKey)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to sign and encrypt contract - %v", err)
 	}
 
 	return signedEncryptContract, nil
@@ -108,7 +108,7 @@ func HpcrContractSignedEncrypted(contract, encryptionCertificate, privateKey str
 // HpcrContractSignedEncryptedContractExpiry - function to generate sign with contract expiry enabled and encrypt contract (with CSR parameters and CSR file)
 func HpcrContractSignedEncryptedContractExpiry(contract, encryptionCertificate, privateKey, cacert, caKey, csrDataStr, csrPemData string, expiryDays int) (string, error) {
 	if gen.CheckIfEmpty(contract, privateKey, cacert, caKey) {
-		return "", fmt.Errorf("folder path is empty")
+		return "", fmt.Errorf(emptyParameterErrStatement)
 	}
 
 	if csrPemData == "" && csrDataStr == "" || len(csrPemData) > 0 && len(csrDataStr) > 0 {
@@ -117,12 +117,12 @@ func HpcrContractSignedEncryptedContractExpiry(contract, encryptionCertificate, 
 
 	signingCert, err := enc.CreateSigningCert(privateKey, cacert, caKey, csrDataStr, csrPemData, expiryDays)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to generate signing certificate - %v", err)
 	}
 
 	finalContract, err := EncryptWrapper(contract, encryptionCertificate, privateKey, signingCert)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to generate signed and encrypted contract - %v", err)
 	}
 
 	return finalContract, nil
@@ -131,7 +131,7 @@ func HpcrContractSignedEncryptedContractExpiry(contract, encryptionCertificate, 
 // EncryptWrapper - wrapper function to sign (with and without contract expiry) and encrypt contract
 func EncryptWrapper(contract, encryptionCertificate, privateKey, publicKey string) (string, error) {
 	if gen.CheckIfEmpty(contract, privateKey, publicKey) {
-		return "", fmt.Errorf("folder path is empty")
+		return "", fmt.Errorf(emptyParameterErrStatement)
 	}
 
 	var contractMap map[string]interface{}
@@ -140,37 +140,37 @@ func EncryptWrapper(contract, encryptionCertificate, privateKey, publicKey strin
 
 	err := yaml.Unmarshal([]byte(contract), &contractMap)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to unmarshal YAML - %v", err)
 	}
 
 	workloadData, err := gen.MapToYaml(contractMap["workload"].(map[string]interface{}))
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to convert MAP to YAML - %v", err)
 	}
 
 	encryptedWorkload, _, err := Encrypter(workloadData, encryptCertificate)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to encrypt workload - %v", err)
 	}
 
 	updatedEnv, err := gen.KeyValueInjector(contractMap["env"].(map[string]interface{}), "signingKey", gen.EncodeToBase64(publicKey))
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to inject signingKey to env - %v", err)
 	}
 
 	encryptedEnv, _, err := Encrypter(updatedEnv, encryptCertificate)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to encrypt env - %v", err)
 	}
 
 	workloadEnvSignature, err := enc.SignContract(encryptedWorkload, encryptedEnv, privateKey)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to sign contract - %v", err)
 	}
 
 	finalContract, err := enc.GenFinalSignedContract(encryptedWorkload, encryptedEnv, workloadEnvSignature)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to generate final contract - %v", err)
 	}
 
 	return finalContract, nil
@@ -179,24 +179,24 @@ func EncryptWrapper(contract, encryptionCertificate, privateKey, publicKey strin
 // Encrypter - function to generate encrypted hyper protect data from plain string
 func Encrypter(stringText, encryptionCertificate string) (string, string, error) {
 	if gen.CheckIfEmpty(stringText) {
-		return "", "", fmt.Errorf("folder path is empty")
+		return "", "", fmt.Errorf(emptyParameterErrStatement)
 	}
 
 	encCert := gen.FetchEncryptionCertificate(encryptionCertificate)
 
 	password, err := enc.RandomPasswordGenerator()
 	if err != nil {
-		fmt.Println(err)
+		return "", "", fmt.Errorf("failed to generate random password - %v", err)
 	}
 
 	encodedEncryptedPassword, err := enc.EncryptPassword(password, encCert)
 	if err != nil {
-		fmt.Println(err)
+		return "", "", fmt.Errorf("failed to encrypt password - %v", err)
 	}
 
 	encryptedString, err := enc.EncryptString(password, stringText)
 	if err != nil {
-		fmt.Println(err)
+		return "", "", fmt.Errorf("failed to encrypt key - %v", err)
 	}
 
 	return enc.EncryptFinalStr(encodedEncryptedPassword, encryptedString), gen.GenerateSha256(stringText), nil
