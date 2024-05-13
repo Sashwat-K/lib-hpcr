@@ -68,6 +68,22 @@ func ExecCommand(name string, stdinInput string, args ...string) (string, error)
 	return out.String(), nil
 }
 
+// ReadDataFromFile - function to read data from file
+func ReadDataFromFile(filePath string) (string, error) {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+
+	content, err := io.ReadAll(file)
+	if err != nil {
+		return "", err
+	}
+
+	return string(content), nil
+}
+
 // CreateTempFile - function to create temp file
 func CreateTempFile(data string) (string, error) {
 	trimmedData := strings.TrimSpace(data)

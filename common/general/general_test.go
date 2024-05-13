@@ -13,6 +13,9 @@ import (
 )
 
 const (
+	simpleSampleText     = "Testing"
+	simpleSampleTextPath = "../../samples/simple_file.txt"
+
 	simpleContractPath     = "../../samples/simple_contract.yaml"
 	certificateDownloadUrl = "https://cloud.ibm.com/media/docs/downloads/hyper-protect-container-runtime/ibm-hyper-protect-container-runtime-1-0-s390x-15-encrypt.crt"
 
@@ -52,10 +55,20 @@ func TestExecCommandUserInput(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+// Testcase to check if ReadDataFromFile() can read data from file
+func TestReadDataFromFile(t *testing.T) {
+	content, err := ReadDataFromFile(simpleSampleTextPath)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	assert.Equal(t, content, simpleSampleText)
+	assert.NoError(t, err)
+}
+
 // Testcase to check if CreateTempFile() can create and modify temp files
 func TestCreateTempFile(t *testing.T) {
-	text := "Testing"
-	tmpfile, err := CreateTempFile(text)
+	tmpfile, err := CreateTempFile(simpleSampleText)
 
 	file, err1 := os.Open(tmpfile)
 	if err1 != nil {
@@ -73,14 +86,13 @@ func TestCreateTempFile(t *testing.T) {
 		fmt.Println(err1)
 	}
 
-	assert.Equal(t, text, string(content))
+	assert.Equal(t, simpleSampleText, string(content))
 	assert.NoError(t, err)
 }
 
 // Testcase to check TestRemoveTempFile() removes a file
 func TestRemoveTempFile(t *testing.T) {
-	text := "Testing"
-	tmpfile, err := CreateTempFile(text)
+	tmpfile, err := CreateTempFile(simpleSampleText)
 	if err != nil {
 		fmt.Println(err)
 	}
