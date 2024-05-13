@@ -1,7 +1,6 @@
 package image
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/Masterminds/semver/v3"
@@ -27,19 +26,18 @@ const (
 func TestSelectImage(t *testing.T) {
 	imageJsonList, err := gen.ReadDataFromFile(ibmCloudImageListPath)
 	if err != nil {
-		fmt.Println(err)
+		t.Errorf("failed to read data from file - %v", err)
 	}
 
 	imageId, imageName, imageChecksum, ImageVersion, err := HpcrSelectImage(imageJsonList, sampleVersion)
 	if err != nil {
-		fmt.Println(err)
+		t.Errorf("failed to select HPCR image - %v", err)
 	}
 
 	assert.Equal(t, imageId, sampleId)
 	assert.Equal(t, imageName, sampleName)
 	assert.Equal(t, imageChecksum, sampleChecksum)
 	assert.Equal(t, ImageVersion, sampleVersion)
-	assert.NoError(t, err)
 }
 
 // Testcase to check if TestIsCandidateImage() can correctly identify if given data is hyper protect image data
@@ -63,7 +61,7 @@ func TestIsCandidateImage(t *testing.T) {
 func TestPickLatestImage(t *testing.T) {
 	version, err := semver.NewVersion(sampleVersion)
 	if err != nil {
-		fmt.Println(err)
+		t.Errorf("failed to generate semantic version - %v", err)
 	}
 
 	var image []ImageVersion
@@ -72,7 +70,7 @@ func TestPickLatestImage(t *testing.T) {
 
 	imageId, imageName, imageChecksum, imageVersion, err := PickLatestImage(image, sampleVersion)
 	if err != nil {
-		fmt.Println(err)
+		t.Errorf("failed to pick latest image - %v", err)
 	}
 
 	assert.Equal(t, imageId, sampleId)

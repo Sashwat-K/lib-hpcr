@@ -2,7 +2,6 @@ package general
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 	"testing"
 
@@ -44,61 +43,63 @@ func TestCheckIfEmpty(t *testing.T) {
 // Testcase to check ExecCommand() works
 func TestExecCommand(t *testing.T) {
 	_, err := ExecCommand("openssl", "", "version")
-
-	assert.NoError(t, err)
+	if err != nil {
+		t.Errorf("failed to execute command - %v", err)
+	}
 }
 
 // Testcase to check ExecCommand() when user input is given
 func TestExecCommandUserInput(t *testing.T) {
 	_, err := ExecCommand("openssl", "hello", "version")
-
-	assert.NoError(t, err)
+	if err != nil {
+		t.Errorf("failed to execute command - %v", err)
+	}
 }
 
 // Testcase to check if ReadDataFromFile() can read data from file
 func TestReadDataFromFile(t *testing.T) {
 	content, err := ReadDataFromFile(simpleSampleTextPath)
 	if err != nil {
-		fmt.Println(err)
+		t.Errorf("failed to read text from file - %v", err)
 	}
 
 	assert.Equal(t, content, simpleSampleText)
-	assert.NoError(t, err)
 }
 
 // Testcase to check if CreateTempFile() can create and modify temp files
 func TestCreateTempFile(t *testing.T) {
 	tmpfile, err := CreateTempFile(simpleSampleText)
 	if err != nil {
-		fmt.Println(err)
+		t.Errorf("failed to create temp file - %v", err)
 	}
 
 	content, err := ReadDataFromFile(tmpfile)
 	if err != nil {
-		fmt.Println(err)
+		t.Errorf("failed to read data from file - %v", err)
 	}
 
-	err = os.Remove(tmpfile)
+	err = RemoveTempFile(tmpfile)
 	if err != nil {
-		fmt.Println(err)
+		t.Errorf("failed to remove file - %v", err)
 	}
 
 	assert.Equal(t, simpleSampleText, content)
-	assert.NoError(t, err)
 }
 
 // Testcase to check TestRemoveTempFile() removes a file
 func TestRemoveTempFile(t *testing.T) {
 	tmpfile, err := CreateTempFile(simpleSampleText)
 	if err != nil {
-		fmt.Println(err)
+		t.Errorf("failed to create temp file - %v", err)
 	}
 
 	err = RemoveTempFile(tmpfile)
+	if err != nil {
+		t.Errorf("failed to remove file - %v", err)
+	}
 
 	err1 := CheckFileFolderExists(tmpfile)
 
-	assert.NoError(t, err)
 	assert.False(t, err1, "The created file was removed and must not exist")
 }
 
@@ -106,11 +107,10 @@ func TestRemoveTempFile(t *testing.T) {
 func TestListFoldersAndFiles(t *testing.T) {
 	result, err := ListFoldersAndFiles(sampleComposeFolder)
 	if err != nil {
-		fmt.Println(err)
+		t.Errorf("failed to list files and folders - %v", err)
 	}
 
 	assert.Contains(t, result, filepath.Join(sampleComposeFolder, "docker-compose.yaml"))
-	assert.NoError(t, err)
 }
 
 // Testcase to check if CheckFileFolderExists() is able check if file or folder exists
@@ -138,20 +138,16 @@ func TestEncodeToBase64(t *testing.T) {
 func TestDecodeBase64String(t *testing.T) {
 	result, err := DecodeBase64String(sampleBase64Data)
 	if err != nil {
-		fmt.Println(err)
+		t.Errorf("failed to decode Base64 string - %v", err)
 	}
 
-	fmt.Println(result)
-
 	assert.Equal(t, sampleStringData, result)
-	assert.NoError(t, err)
 }
 
 // Testcase to check if GenerateSha256() is able to generate SHA256 of string
 func TestGenerateSha256(t *testing.T) {
 	result := GenerateSha256(sampleStringData)
 
-	fmt.Println(result)
 	assert.NotEmpty(t, result)
 }
 
@@ -161,20 +157,18 @@ func TestMapToYaml(t *testing.T) {
 
 	contract, err := ReadDataFromFile(simpleContractPath)
 	if err != nil {
-		fmt.Println(err)
+		t.Errorf("failed to read contract - %v", err)
 	}
 
 	err = yaml.Unmarshal([]byte(contract), &contractMap)
 	if err != nil {
-		fmt.Println(err)
+		t.Errorf("failed to unmarshal YAML - %v", err)
 	}
 
 	_, err = MapToYaml(contractMap["env"].(map[string]interface{}))
 	if err != nil {
-		fmt.Println(err)
+		t.Errorf("failed to convert MAP to YAML - %v", err)
 	}
-
-	assert.NoError(t, err)
 }
 
 // Testcase to check if KeyValueInjector() can add key value to existing map
@@ -185,32 +179,30 @@ func TestKeyValueInjector(t *testing.T) {
 
 	contract, err := ReadDataFromFile(simpleContractPath)
 	if err != nil {
-		fmt.Println(err)
+		t.Errorf("failed to read contract - %v", err)
 	}
 
 	err = yaml.Unmarshal([]byte(contract), &contractMap)
 	if err != nil {
-		fmt.Println(err)
+		t.Errorf("failed to unmarshal contract - %v", err)
 	}
 
 	finalContract, err := KeyValueInjector(contractMap, key, value)
 	if err != nil {
-		fmt.Println(err)
+		t.Errorf("failed to inject envWorkloadSignature - %v", err)
 	}
 
 	assert.Contains(t, finalContract, fmt.Sprintf("%s: %s", key, value))
-	assert.NoError(t, err)
 }
 
 // Testcase to check if CertificateDownloader() can download encryption certificate
 func TestCertificateDownloader(t *testing.T) {
 	certificate, err := CertificateDownloader(certificateDownloadUrl)
 	if err != nil {
-		fmt.Println(err)
+		t.Errorf("failed to download certificate - %v", err)
 	}
 
 	assert.Contains(t, certificate, "-----BEGIN CERTIFICATE-----")
-	assert.NoError(t, err)
 }
 
 // Testcase to check if GetEncryptPassWorkload() can fetch encoded encrypted password and encoded encrypted data from string
@@ -226,11 +218,10 @@ func TestGetEncryptPassWorkload(t *testing.T) {
 func TestCheckUrlExists(t *testing.T) {
 	result, err := CheckUrlExists(certificateDownloadUrl)
 	if err != nil {
-		fmt.Println(err)
+		t.Errorf("URL verification failed - %v", err)
 	}
 
 	assert.Equal(t, result, true)
-	assert.NoError(t, err)
 }
 
 func TestGetDataFromLatestVersion(t *testing.T) {
@@ -238,12 +229,11 @@ func TestGetDataFromLatestVersion(t *testing.T) {
 
 	key, value, err := GetDataFromLatestVersion(sampleCertificateJson, versionConstraints)
 	if err != nil {
-		fmt.Println(err)
+		t.Errorf("failed to get encryption certificate - %v", err)
 	}
 
 	assert.Equal(t, key, "3.5.10")
 	assert.Equal(t, value, "data4")
-	assert.NoError(t, err)
 }
 
 // Testcase to check if FetchEncryptionCertificate() fetches encryption certificate
@@ -257,14 +247,13 @@ func TestFetchEncryptionCertificate(t *testing.T) {
 func TestGenerateTgzBase64(t *testing.T) {
 	filesFoldersList, err := ListFoldersAndFiles(sampleComposeFolder)
 	if err != nil {
-		fmt.Println(err)
+		t.Errorf("failed to list files and folders - %v", err)
 	}
 
 	result, err := GenerateTgzBase64(filesFoldersList)
 	if err != nil {
-		fmt.Println(err)
+		t.Errorf("failed to generate TGZ base64 - %v", err)
 	}
 
 	assert.NotEmpty(t, result)
-	assert.NoError(t, err)
 }

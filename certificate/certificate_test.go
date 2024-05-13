@@ -1,7 +1,6 @@
 package certificate
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -24,39 +23,36 @@ func TestGetEncryptionCertificateFromJson(t *testing.T) {
 
 	key, value, err := HpcrGetEncryptionCertificateFromJson(sampleJsonData, version)
 	if err != nil {
-		fmt.Println(err)
+		t.Errorf("failed to get encryption certificate from JSON - %v", err)
 	}
 
 	assert.Equal(t, key, "4.0.0")
 	assert.Equal(t, value, "data5")
-	assert.NoError(t, err)
 }
 
 // Testcase to check if DownloadEncryptionCertificates() is able to download encryption certificates as per constraint
 func TestDownloadEncryptionCertificates(t *testing.T) {
 	certs, err := HpcrDownloadEncryptionCertificates(sampleEncryptionCertVersions)
 	if err != nil {
-		fmt.Println(err)
+		t.Errorf("failed to download HPCR encryption certificates - %v", err)
 	}
 
 	assert.Contains(t, certs, "1.0.13")
-	assert.NoError(t, err)
 }
 
 // Testcase to check both DownloadEncryptionCertificates() and GetEncryptionCertificateFromJson() together
 func TestCombined(t *testing.T) {
 	certs, err := HpcrDownloadEncryptionCertificates(sampleEncryptionCertVersions)
 	if err != nil {
-		fmt.Println(err)
+		t.Errorf("failed to download HPCR encryption certificates - %v", err)
 	}
 
 	version := "> 1.0.14"
 
 	key, _, err := HpcrGetEncryptionCertificateFromJson(certs, version)
 	if err != nil {
-		fmt.Println(err)
+		t.Errorf("failed to get encryption certificate from JSON - %v", err)
 	}
 
 	assert.Equal(t, key, "1.0.15")
-	assert.NoError(t, err)
 }

@@ -2,7 +2,6 @@ package contract
 
 import (
 	"encoding/json"
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -77,7 +76,6 @@ func common(testType string) (string, string, string, string, string, error) {
 
 		caCert, err := gen.ReadDataFromFile(sampleCeCaCertPath)
 		if err != nil {
-			fmt.Println(err)
 			return "", "", "", "", "", err
 		}
 
@@ -95,7 +93,7 @@ func common(testType string) (string, string, string, string, string, error) {
 func TestHpcrText(t *testing.T) {
 	base64, sha256, err := HpcrText(sampleStringData)
 	if err != nil {
-		fmt.Println(err)
+		t.Errorf("failed to generate HPCR text - %v", err)
 	}
 
 	assert.Equal(t, base64, sampleBase64Data)
@@ -106,7 +104,7 @@ func TestHpcrText(t *testing.T) {
 func TestHpcrJson(t *testing.T) {
 	base64, sha256, err := HpcrJson(sampleStringJson)
 	if err != nil {
-		fmt.Println(err)
+		t.Errorf("failed to generate HPCR JSON - %v", err)
 	}
 
 	assert.Equal(t, base64, sampleBase64Json)
@@ -117,7 +115,7 @@ func TestHpcrJson(t *testing.T) {
 func TestHpcrTextEncrypted(t *testing.T) {
 	result, sha256, err := HpcrTextEncrypted(sampleStringData, "")
 	if err != nil {
-		fmt.Println(err)
+		t.Errorf("failed to generate HPCR encrypted text - %v", err)
 	}
 
 	assert.Contains(t, result, "hyper-protect-basic.")
@@ -128,7 +126,7 @@ func TestHpcrTextEncrypted(t *testing.T) {
 func TestHpcrJsonEncrypted(t *testing.T) {
 	result, sha256, err := HpcrJsonEncrypted(sampleStringJson, "")
 	if err != nil {
-		fmt.Println(err)
+		t.Errorf("failed to generate HPCR encrypted JSON - %v", err)
 	}
 
 	assert.Contains(t, result, "hyper-protect-basic.")
@@ -139,103 +137,97 @@ func TestHpcrJsonEncrypted(t *testing.T) {
 func TestHpcrTgz(t *testing.T) {
 	result, err := HpcrTgz(sampleComposeFolderPath)
 	if err != nil {
-		fmt.Println(err)
+		t.Errorf("failed to generate HPCR TGZ - %v", err)
 	}
 
 	assert.NotEmpty(t, result)
-	assert.NoError(t, err)
 }
 
 func TestHpcrTgzEncrypted(t *testing.T) {
 	result, _, err := HpcrTgzEncrypted(sampleComposeFolderPath, "")
 	if err != nil {
-		fmt.Println(err)
+		t.Errorf("failed to generated HPCR encrypted TGZ - %v", err)
 	}
 
 	assert.Contains(t, result, "hyper-protect-basic.")
-	assert.NoError(t, err)
 }
 
 // Testcase to check if HpcrContractSignedEncrypted() is able to generate
 func TestHpcrContractSignedEncrypted(t *testing.T) {
 
-	contract, privateKey, _, _, _, err := common("TestHpcrContractSignedEncrypted")
+	contract, privateKey, _, _, _, err := common(t.Name())
 	if err != nil {
-		fmt.Println(err)
+		t.Errorf("failed to get contract and private key - %v", err)
 	}
 
 	result, err := HpcrContractSignedEncrypted(contract, "", privateKey)
 	if err != nil {
-		fmt.Println(err)
+		t.Errorf("failed to generate signed and encrypted contract - %v", err)
 	}
 
 	assert.NotEmpty(t, result)
-	assert.NoError(t, err)
 }
 
 // Testcase to check if HpcrContractSignedEncryptedContractExpiry() is able to create signed and encrypted contract with contract expiry enabled with CSR parameters
 func TestHpcrContractSignedEncryptedContractExpiryCsrParams(t *testing.T) {
-	contract, privateKey, _, caCert, caKey, err := common("TestHpcrContractSignedEncryptedContractExpiryCsrParams")
+	contract, privateKey, _, caCert, caKey, err := common(t.Name())
 	if err != nil {
-		fmt.Println(err)
+		t.Errorf("failed to get contract, private key, CA certificate and CA key - %v", err)
 	}
 
 	csrParams, err := json.Marshal(sampleCeCSRPems)
 	if err != nil {
-		fmt.Println(err)
+		t.Errorf("failed to unmarshal CSR parameters - %v", err)
 	}
 
 	result, err := HpcrContractSignedEncryptedContractExpiry(contract, "", privateKey, caCert, caKey, string(csrParams), "", sampleContractExpiryDays)
 	if err != nil {
-		fmt.Println(err)
+		t.Errorf("failed to generate signed and encrypted contract with contract expiry - %v", err)
 	}
 
 	assert.NotEmpty(t, result)
-	assert.NoError(t, err)
 }
 
 // Testcase to check if HpcrContractSignedEncryptedContractExpiry() is able to create signed and encrypted contract with contract expiry enabled with CSR PEM data
 func TestHpcrContractSignedEncryptedContractExpiryCsrPem(t *testing.T) {
-	contract, privateKey, _, caCert, caKey, err := common("TestHpcrContractSignedEncryptedContractExpiryCsrPem")
+	contract, privateKey, _, caCert, caKey, err := common(t.Name())
 	if err != nil {
-		fmt.Println(err)
+		t.Errorf("failed to get contract, private key, CA certificate and CA key - %v", err)
 	}
 
 	csr, err := gen.ReadDataFromFile(sampleCeCsrPath)
 	if err != nil {
-		fmt.Println(err)
+		t.Errorf("failed to read CSR file - %v", err)
 	}
 
 	result, err := HpcrContractSignedEncryptedContractExpiry(contract, "", privateKey, caCert, caKey, "", csr, sampleContractExpiryDays)
 	if err != nil {
-		fmt.Println(err)
+		t.Errorf("failed to generate signed and encrypted contract with contract expiry - %v", err)
 	}
 
 	assert.NotEmpty(t, result)
-	assert.NoError(t, err)
 }
 
 // Testcase to check if EncryptWrapper() is able to sign and encrypt a contract
 func TestEncryptWrapper(t *testing.T) {
 	contract, privateKey, publicKey, _, _, err := common("TestEncryptWrapper")
 	if err != nil {
-		fmt.Println(err)
+		t.Errorf("failed to get contract, private key and public key - %v", err)
 	}
 
 	result, err := EncryptWrapper(contract, "", privateKey, publicKey)
 	if err != nil {
-		fmt.Println(err)
+		t.Errorf("failed to sign and encrypt contract - %v", err)
 	}
 
 	assert.NotEmpty(t, result)
-	assert.NoError(t, err)
 }
 
 // Testcase to check if Encrypter() is able to encrypt and generate SHA256 from string
 func TestEncrypter(t *testing.T) {
 	result, sha256, err := Encrypter(sampleStringJson, "")
 	if err != nil {
-		fmt.Println(err)
+		t.Errorf("failed to encrypt contract - %v", err)
 	}
 
 	assert.Contains(t, result, "hyper-protect-basic.")
