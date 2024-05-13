@@ -15,6 +15,10 @@ This function decrypts encrypted attestation records.
 
 ```go
 import "github.com/Sashwat-K/lib-hpcr/attestation"
+
+func main() {
+    decryptedAttestationRecords, err := HpcrGetAttestationRecords(encryptedChecksum, privateKey)
+}
 ```
 
 #### Input(s)
@@ -30,6 +34,10 @@ This function downloads HPCR encryption certificates from IBM Cloud.
 
 ```go
 import "github.com/Sashwat-K/lib-hpcr/certificate"
+
+func main() {
+    certs, err := HpcrDownloadEncryptionCertificates(sampleEncryptionCertVersionsList)
+}
 ```
 
 #### Input(s)
@@ -44,6 +52,10 @@ This function returns encryption certificate and version from HpcrDownloadEncryp
 
 ```go
 import "github.com/Sashwat-K/lib-hpcr/certificate"
+
+func main() {
+    version, cert, err := HpcrGetEncryptionCertificateFromJson(sampleJsonData, desiredVersion)
+}
 ```
 
 #### Input(s)
@@ -60,6 +72,10 @@ This function generates Base64 for given string.
 
 ```go
 import "github.com/Sashwat-K/lib-hpcr/contract"
+
+func main() {
+    base64, sha256, err := HpcrText(sampleStringData)
+}
 ```
 
 #### Input(s)
@@ -75,6 +91,10 @@ This function encrypts text and formats text as per `hyper-protect-basic.<encode
 
 ```go
 import "github.com/Sashwat-K/lib-hpcr/contract"
+
+func main() {
+    encryptedText, sha256, err := HpcrTextEncrypted(sampleStringData, encryptionCertificate)
+}
 ```
 
 #### Input(s)
@@ -91,6 +111,10 @@ This function generates Base64 of JSON input
 
 ```go
 import "github.com/Sashwat-K/lib-hpcr/contract"
+
+func main() {
+    base64, sha256, err := HpcrJson(sampleStringJson)
+}
 ```
 
 #### Input(s)
@@ -106,6 +130,10 @@ This function generates encrypts JSON and formats text as per `hyper-protect-bas
 
 ```go
 import "github.com/Sashwat-K/lib-hpcr/contract"
+
+func main() {
+    encryptedJson, sha256, err := HpcrJsonEncrypted(sampleStringJson, encryptionCertificate)
+}
 ```
 
 #### Input(s)
@@ -122,6 +150,10 @@ This function generates base64 of TGZ that contains files under the given folder
 
 ```go
 import "github.com/Sashwat-K/lib-hpcr/contract"
+
+func main() {
+    encodedTgz, err := HpcrTgz(composePath)
+}
 ```
 
 #### Input(s)
@@ -133,6 +165,14 @@ import "github.com/Sashwat-K/lib-hpcr/contract"
 
 ### HpcrTgzEncrypted()
 This function first generates base64 of TGZ that contains files under the given folder and then encrypts the data as per `hyper-protect-basic.<encoded-encrypted-password>.<encoded-encrypted-data>`.
+
+```go
+import "github.com/Sashwat-K/lib-hpcr/contract"
+
+func main() {
+    encodedTgz, err := HpcrTgzEncrypted(composePath, encryptionCertificate)
+}
+```
 
 #### Input(s)
 1. Path of folder
@@ -146,6 +186,10 @@ This function generates a signed and encrypted contract with format `hyper-prote
 
 ```go
 import "github.com/Sashwat-K/lib-hpcr/contract"
+
+func main() {
+    signedEncryptedContract, err := HpcrContractSignedEncrypted(contract, encryptionCertificate, privateKey)
+}
 ```
 
 #### Input(s)
@@ -162,6 +206,24 @@ This function generates a signed and encrypted contract with contract expiry ena
 
 ```go
 import "github.com/Sashwat-K/lib-hpcr/contract"
+
+func usingCsrParams() {
+    sampleCeCSRPems = map[string]interface{}{
+		"country":  "IN",
+		"state":    "Karnataka",
+		"location": "Bangalore",
+		"org":      "IBM",
+		"unit":     "ISDL",
+		"domain":   "HPVS",
+		"mail":     "sashwat.k@ibm.com",
+	}
+
+    signedEncryptedCEContract, err := HpcrContractSignedEncryptedContractExpiry(contract, encryptionCertificate, privateKey, caCert, caKey, string(csrParams), "", sampleContractExpiryDays)
+}
+
+func usingCsrPem() {
+    signedEncryptedCEContract, err := HpcrContractSignedEncryptedContractExpiry(contract, encryptionCertificate, privateKey, caCert, caKey, "", csr, sampleContractExpiryDays)
+}
 ```
 
 #### Input(s)
@@ -197,6 +259,10 @@ This function selects the latest HPCR image details from image list out from IBM
 
 ```go
 import "github.com/Sashwat-K/lib-hpcr/image"
+
+func main() {
+    imageId, imageName, imageChecksum, ImageVersion, err := HpcrSelectImage(imageJsonList, version)
+}
 ```
 
 #### Input(s)
