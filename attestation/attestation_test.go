@@ -2,11 +2,11 @@ package attestation
 
 import (
 	"fmt"
-	"io"
-	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	gen "github.com/Sashwat-K/lib-hpcr/common/general"
 )
 
 const (
@@ -16,29 +16,17 @@ const (
 
 // Testcase to check if HpcrGetAttestationRecords() retrieves attestation records from encrypted data
 func TestHpcrGetAttestationRecords(t *testing.T) {
-	encChecksumPath, err := os.Open(encryptedChecksumPath)
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer encChecksumPath.Close()
-
-	encChecksum, err := io.ReadAll(encChecksumPath)
+	encChecksum, err := gen.ReadDataFromFile(encryptedChecksumPath)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	privateKey, err := os.Open(privateKeyPath)
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer privateKey.Close()
-
-	privateKeyData, err := io.ReadAll(privateKey)
+	privateKeyData, err := gen.ReadDataFromFile(privateKeyPath)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	result, err := HpcrGetAttestationRecords(string(encChecksum), string(privateKeyData))
+	result, err := HpcrGetAttestationRecords(encChecksum, privateKeyData)
 	if err != nil {
 		fmt.Println(err)
 	}

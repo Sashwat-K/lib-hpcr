@@ -2,12 +2,12 @@ package decrypt
 
 import (
 	"fmt"
-	"io"
-	"os"
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	gen "github.com/Sashwat-K/lib-hpcr/common/general"
 )
 
 const (
@@ -17,31 +17,19 @@ const (
 
 // Testcase to check if DecryptPassword() is able to decrypt password
 func TestDecryptPassword(t *testing.T) {
-	encChecksumPath, err := os.Open(encryptedChecksumPath)
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer encChecksumPath.Close()
-
-	encChecksum, err := io.ReadAll(encChecksumPath)
+	encChecksum, err := gen.ReadDataFromFile(encryptedChecksumPath)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	encodedEncryptedData := strings.Split(string(encChecksum), ".")[1]
+	encodedEncryptedData := strings.Split(encChecksum, ".")[1]
 
-	privateKey, err := os.Open(privateKeyPath)
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer privateKey.Close()
-
-	privateKeyData, err := io.ReadAll(privateKey)
+	privateKeyData, err := gen.ReadDataFromFile(privateKeyPath)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	_, err = DecryptPassword(encodedEncryptedData, string(privateKeyData))
+	_, err = DecryptPassword(encodedEncryptedData, privateKeyData)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -51,32 +39,20 @@ func TestDecryptPassword(t *testing.T) {
 
 // Testcase to check if DecryptWorkload() is able to decrypt workload
 func TestDecryptWorkload(t *testing.T) {
-	encChecksumPath, err := os.Open(encryptedChecksumPath)
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer encChecksumPath.Close()
-
-	encChecksum, err := io.ReadAll(encChecksumPath)
+	encChecksum, err := gen.ReadDataFromFile(encryptedChecksumPath)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	encodedEncryptedPassword := strings.Split(string(encChecksum), ".")[1]
-	encodedEncryptedData := strings.Split(string(encChecksum), ".")[2]
+	encodedEncryptedPassword := strings.Split(encChecksum, ".")[1]
+	encodedEncryptedData := strings.Split(encChecksum, ".")[2]
 
-	privateKey, err := os.Open(privateKeyPath)
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer privateKey.Close()
-
-	privateKeyData, err := io.ReadAll(privateKey)
+	privateKeyData, err := gen.ReadDataFromFile(privateKeyPath)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	password, err := DecryptPassword(encodedEncryptedPassword, string(privateKeyData))
+	password, err := DecryptPassword(encodedEncryptedPassword, privateKeyData)
 	if err != nil {
 		fmt.Println(err)
 	}

@@ -2,14 +2,14 @@ package general
 
 import (
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 	"testing"
 
-	cert "github.com/Sashwat-K/hpcr-encryption-certificate"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
+
+	cert "github.com/Sashwat-K/hpcr-encryption-certificate"
 )
 
 const (
@@ -69,24 +69,21 @@ func TestReadDataFromFile(t *testing.T) {
 // Testcase to check if CreateTempFile() can create and modify temp files
 func TestCreateTempFile(t *testing.T) {
 	tmpfile, err := CreateTempFile(simpleSampleText)
-
-	file, err1 := os.Open(tmpfile)
-	if err1 != nil {
-		fmt.Println(err1)
-	}
-	defer file.Close()
-
-	content, err1 := io.ReadAll(file)
-	if err1 != nil {
-		fmt.Println(err1)
+	if err != nil {
+		fmt.Println(err)
 	}
 
-	err1 = os.Remove(tmpfile)
-	if err1 != nil {
-		fmt.Println(err1)
+	content, err := ReadDataFromFile(tmpfile)
+	if err != nil {
+		fmt.Println(err)
 	}
 
-	assert.Equal(t, simpleSampleText, string(content))
+	err = os.Remove(tmpfile)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	assert.Equal(t, simpleSampleText, content)
 	assert.NoError(t, err)
 }
 
@@ -162,13 +159,7 @@ func TestGenerateSha256(t *testing.T) {
 func TestMapToYaml(t *testing.T) {
 	var contractMap map[string]interface{}
 
-	file, err := os.Open(simpleContractPath)
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer file.Close()
-
-	contract, err := io.ReadAll(file)
+	contract, err := ReadDataFromFile(simpleContractPath)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -192,13 +183,7 @@ func TestKeyValueInjector(t *testing.T) {
 	key := "envWorkloadSignature"
 	value := "testing123"
 
-	file, err := os.Open(simpleContractPath)
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer file.Close()
-
-	contract, err := io.ReadAll(file)
+	contract, err := ReadDataFromFile(simpleContractPath)
 	if err != nil {
 		fmt.Println(err)
 	}

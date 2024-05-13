@@ -4,8 +4,6 @@ import (
 	_ "embed"
 	"encoding/json"
 	"fmt"
-	"io"
-	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -44,34 +42,22 @@ func TestOpensslCheck(t *testing.T) {
 }
 
 func TestGeneratePublicKey(t *testing.T) {
-	privateKeyFile, err := os.Open(simplePrivateKeyPath)
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer privateKeyFile.Close()
-
-	privateKey, err := io.ReadAll(privateKeyFile)
+	privateKey, err := gen.ReadDataFromFile(simplePrivateKeyPath)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	publicKeyFile, err := os.Open(simplePublicKeyPath)
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer publicKeyFile.Close()
-
-	publicKey, err := io.ReadAll(publicKeyFile)
+	publicKey, err := gen.ReadDataFromFile(simplePublicKeyPath)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	result, err := GeneratePublicKey(string(privateKey))
+	result, err := GeneratePublicKey(privateKey)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	assert.Equal(t, result, string(publicKey))
+	assert.Equal(t, result, publicKey)
 	assert.NoError(t, err)
 }
 
@@ -108,13 +94,7 @@ func TestEncryptPassword(t *testing.T) {
 func TestEncryptContract(t *testing.T) {
 	var contractMap map[string]interface{}
 
-	file, err := os.Open(simpleContractPath)
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer file.Close()
-
-	contract, err := io.ReadAll(file)
+	contract, err := gen.ReadDataFromFile(simpleContractPath)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -163,13 +143,7 @@ func TestEncryptString(t *testing.T) {
 func TestEncryptFinalStr(t *testing.T) {
 	var contractMap map[string]interface{}
 
-	file, err := os.Open(simpleContractPath)
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer file.Close()
-
-	contract, err := io.ReadAll(file)
+	contract, err := gen.ReadDataFromFile(simpleContractPath)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -208,35 +182,17 @@ func TestEncryptFinalStr(t *testing.T) {
 
 // Testcase to check if CreateSigningCert() is able to create signing certificate with CSR parameters
 func TestCreateSigningCert(t *testing.T) {
-	privateKeyPath, err := os.Open(samplePrivateKeyPath)
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer privateKeyPath.Close()
-
-	privateKey, err := io.ReadAll(privateKeyPath)
+	privateKey, err := gen.ReadDataFromFile(samplePrivateKeyPath)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	cacertPath, err := os.Open(sampleCaCertPath)
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer cacertPath.Close()
-
-	cacert, err := io.ReadAll(cacertPath)
+	cacert, err := gen.ReadDataFromFile(sampleCaCertPath)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	caKeyPath, err := os.Open(sampleCaKeyPath)
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer caKeyPath.Close()
-
-	caKey, err := io.ReadAll(caKeyPath)
+	caKey, err := gen.ReadDataFromFile(sampleCaKeyPath)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -255,7 +211,7 @@ func TestCreateSigningCert(t *testing.T) {
 		fmt.Println(err)
 	}
 
-	signingCert, err := CreateSigningCert(string(privateKey), string(cacert), string(caKey), string(csrDataStr), "", sampleExpiryDays)
+	signingCert, err := CreateSigningCert(privateKey, cacert, caKey, string(csrDataStr), "", sampleExpiryDays)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -266,51 +222,27 @@ func TestCreateSigningCert(t *testing.T) {
 
 // Testcase to check if CreateSigningCert() is able to create signing certificate using CSR file
 func TestCreateSigningCertCsrFile(t *testing.T) {
-	privateKeyPath, err := os.Open(samplePrivateKeyPath)
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer privateKeyPath.Close()
-
-	privateKey, err := io.ReadAll(privateKeyPath)
+	privateKey, err := gen.ReadDataFromFile(samplePrivateKeyPath)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	cacertPath, err := os.Open(sampleCaCertPath)
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer cacertPath.Close()
-
-	cacert, err := io.ReadAll(cacertPath)
+	cacert, err := gen.ReadDataFromFile(sampleCaCertPath)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	caKeyPath, err := os.Open(sampleCaKeyPath)
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer caKeyPath.Close()
-
-	caKey, err := io.ReadAll(caKeyPath)
+	caKey, err := gen.ReadDataFromFile(sampleCaKeyPath)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	csrFilePath, err := os.Open(sampleCsrFilePath)
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer csrFilePath.Close()
-
-	csr, err := io.ReadAll(csrFilePath)
+	csr, err := gen.ReadDataFromFile(sampleCsrFilePath)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	signingCert, err := CreateSigningCert(string(privateKey), string(cacert), string(caKey), "", string(csr), sampleExpiryDays)
+	signingCert, err := CreateSigningCert(privateKey, cacert, caKey, "", csr, sampleExpiryDays)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -323,24 +255,12 @@ func TestCreateSigningCertCsrFile(t *testing.T) {
 func TestSignContract(t *testing.T) {
 	var contractMap map[string]interface{}
 
-	file, err := os.Open(simpleContractPath)
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer file.Close()
-
-	contract, err := io.ReadAll(file)
+	contract, err := gen.ReadDataFromFile(simpleContractPath)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	privateKeyPath, err := os.Open(samplePrivateKeyPath)
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer privateKeyPath.Close()
-
-	privateKey, err := io.ReadAll(privateKeyPath)
+	privateKey, err := gen.ReadDataFromFile(samplePrivateKeyPath)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -378,7 +298,7 @@ func TestSignContract(t *testing.T) {
 
 	finalEnv := EncryptFinalStr(encryptedPassword, encryptedEnv)
 
-	workloadEnvSignature, err := SignContract(finalWorkload, finalEnv, string(privateKey))
+	workloadEnvSignature, err := SignContract(finalWorkload, finalEnv, privateKey)
 	if err != nil {
 		fmt.Println(err)
 	}

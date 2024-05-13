@@ -3,11 +3,11 @@ package contract
 import (
 	"encoding/json"
 	"fmt"
-	"io"
-	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	gen "github.com/Sashwat-K/lib-hpcr/common/general"
 )
 
 const (
@@ -50,81 +50,43 @@ var (
 
 // common - common function to pull data from files
 func common(testType string) (string, string, string, string, string, error) {
-	simpleContractFile, err := os.Open(simpleContractPath)
-	if err != nil {
-		return "", "", "", "", "", err
-	}
-	defer simpleContractFile.Close()
-
-	contract, err := io.ReadAll(simpleContractFile)
+	contract, err := gen.ReadDataFromFile(simpleContractPath)
 	if err != nil {
 		return "", "", "", "", "", err
 	}
 
-	privateKeyFile, err := os.Open(samplePrivateKeyPath)
-	if err != nil {
-		return "", "", "", "", "", err
-	}
-	defer privateKeyFile.Close()
-
-	privateKey, err := io.ReadAll(privateKeyFile)
+	privateKey, err := gen.ReadDataFromFile(samplePrivateKeyPath)
 	if err != nil {
 		return "", "", "", "", "", err
 	}
 
 	if testType == "TestHpcrContractSignedEncrypted" {
-		return string(contract), string(privateKey), "", "", "", nil
+		return contract, privateKey, "", "", "", nil
 	} else if testType == "TestEncryptWrapper" {
-		publicKeyFile, err := os.Open(samplePublicKeyPath)
+		publicKey, err := gen.ReadDataFromFile(samplePublicKeyPath)
 		if err != nil {
 			return "", "", "", "", "", err
 		}
-		defer privateKeyFile.Close()
 
-		publicKey, err := io.ReadAll(publicKeyFile)
-		if err != nil {
-			return "", "", "", "", "", err
-		}
-		return string(contract), string(privateKey), string(publicKey), "", "", nil
+		return contract, privateKey, publicKey, "", "", nil
 	} else if testType == "TestHpcrContractSignedEncryptedContractExpiryCsrParams" || testType == "TestHpcrContractSignedEncryptedContractExpiryCsrPem" {
-		cePrivateKeyPath, err := os.Open(sampleCePrivateKeyPath)
-		if err != nil {
-			return "", "", "", "", "", err
-		}
-		defer cePrivateKeyPath.Close()
-
-		cePrivateKey, err := io.ReadAll(cePrivateKeyPath)
+		cePrivateKey, err := gen.ReadDataFromFile(sampleCePrivateKeyPath)
 		if err != nil {
 			return "", "", "", "", "", err
 		}
 
-		caCertPath, err := os.Open(sampleCeCaCertPath)
-		if err != nil {
-			fmt.Println("Error parsing CA certificate - ", err)
-			return "", "", "", "", "", err
-		}
-		defer caCertPath.Close()
-
-		caCert, err := io.ReadAll(caCertPath)
+		caCert, err := gen.ReadDataFromFile(sampleCeCaCertPath)
 		if err != nil {
 			fmt.Println(err)
 			return "", "", "", "", "", err
 		}
 
-		caKeyPath, err := os.Open(sampleCeCaKeyPath)
+		caKey, err := gen.ReadDataFromFile(sampleCeCaKeyPath)
 		if err != nil {
-			fmt.Println("Error parsing CA certificate - ", err)
-			return "", "", "", "", "", err
-		}
-		defer caCertPath.Close()
-
-		caKey, err := io.ReadAll(caKeyPath)
-		if err != nil {
-			fmt.Println(err)
 			return "", "", "", "", "", err
 		}
 
-		return string(contract), string(cePrivateKey), "", string(caCert), string(caKey), err
+		return contract, cePrivateKey, "", caCert, caKey, err
 	}
 	return "", "", "", "", "", err
 }
@@ -239,18 +201,12 @@ func TestHpcrContractSignedEncryptedContractExpiryCsrPem(t *testing.T) {
 		fmt.Println(err)
 	}
 
-	csrPemFile, err := os.Open(sampleCeCsrPath)
-	if err != nil {
-		fmt.Println("Error parsing CSR - ", err)
-	}
-	defer csrPemFile.Close()
-
-	csr, err := io.ReadAll(csrPemFile)
+	csr, err := gen.ReadDataFromFile(sampleCeCsrPath)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	result, err := HpcrContractSignedEncryptedContractExpiry(contract, "", privateKey, caCert, caKey, "", string(csr), sampleContractExpiryDays)
+	result, err := HpcrContractSignedEncryptedContractExpiry(contract, "", privateKey, caCert, caKey, "", csr, sampleContractExpiryDays)
 	if err != nil {
 		fmt.Println(err)
 	}

@@ -2,12 +2,12 @@ package image
 
 import (
 	"fmt"
-	"io"
-	"os"
 	"testing"
 
 	"github.com/Masterminds/semver/v3"
 	"github.com/stretchr/testify/assert"
+
+	gen "github.com/Sashwat-K/lib-hpcr/common/general"
 )
 
 const (
@@ -25,18 +25,12 @@ const (
 
 // Testcase to check SelectImage() is able to fetch the latest hyper protect image
 func TestSelectImage(t *testing.T) {
-	imageJsonListPath, err := os.Open(ibmCloudImageListPath)
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer imageJsonListPath.Close()
-
-	imageJsonList, err := io.ReadAll(imageJsonListPath)
+	imageJsonList, err := gen.ReadDataFromFile(ibmCloudImageListPath)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	imageId, imageName, imageChecksum, ImageVersion, err := HpcrSelectImage(string(imageJsonList), sampleVersion)
+	imageId, imageName, imageChecksum, ImageVersion, err := HpcrSelectImage(imageJsonList, sampleVersion)
 	if err != nil {
 		fmt.Println(err)
 	}
