@@ -18,8 +18,10 @@ import (
 	"strings"
 
 	"github.com/Masterminds/semver/v3"
+	"github.com/xeipuuv/gojsonschema"
 	"gopkg.in/yaml.v3"
 
+	sch "github.com/Sashwat-K/hpcr-contract-schema"
 	cert "github.com/Sashwat-K/hpcr-encryption-certificate"
 )
 
@@ -135,6 +137,24 @@ func CheckFileFolderExists(folderFilePath string) bool {
 func IsJSON(str string) bool {
 	var js interface{}
 	return json.Unmarshal([]byte(str), &js) == nil
+}
+
+// YamlToJson - function to convert YAML to JSON
+func YamlToJson(str string) (string, error) {
+	var obj interface{}
+
+	err := yaml.Unmarshal([]byte(str), &obj)
+	if err != nil {
+		return "", err
+	}
+
+	jsonData, err := json.Marshal(obj)
+	if err != nil {
+		return "", err
+	}
+
+	// Marshal the object to JSON
+	return string(jsonData), err
 }
 
 // EncodeToBase64 - function to encode string as base64
@@ -318,4 +338,28 @@ func GenerateTgzBase64(folderFilesPath []string) (string, error) {
 	}
 
 	return EncodeToBase64(buf.String()), nil
+}
+
+// VerifyContractWithSchema - function to verify if contract matches schema
+func VerifyContractWithSchema(contract string) (bool, error) {
+	jsonData, err := YamlToJson(contract)
+	if err != nil {
+		return false, fmt.Errorf("error converting YAML to JSON - %v", err)
+	}
+
+	schema, err := gojsonschema.NewSchema(gojsonschema.NewBytesLoader([]byte(sch.ContractSchema)))
+	if err != nil {
+		return false, fmt.Errorf("failed to parse schema - %v", err)
+	}
+
+	report, err := schema.Validate(gojsonschema.NewBytesLoader([]byte(jsonData)))
+	if err != nil {
+		return false, fmt.Errorf("failed to validate contract - %v", err)
+	}
+
+	for _, err := range report.Errors() {
+		fmt.Printf("- %s\n", err)
+	}
+
+	return report.Valid(), nil
 }

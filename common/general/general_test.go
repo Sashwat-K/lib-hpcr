@@ -257,3 +257,17 @@ func TestGenerateTgzBase64(t *testing.T) {
 
 	assert.NotEmpty(t, result)
 }
+
+func TestVerifyContractWithSchema(t *testing.T) {
+	contract, err := ReadDataFromFile(simpleContractPath)
+	if err != nil {
+		t.Errorf("failed to read contract - %v", err)
+	}
+
+	result, err := VerifyContractWithSchema(contract)
+	if err != nil {
+		t.Errorf("schema verification failed - %v", err)
+	}
+
+	fmt.Println(result)
+}
