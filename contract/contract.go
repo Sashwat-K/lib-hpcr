@@ -86,6 +86,11 @@ func HpcrTgzEncrypted(folderPath, encryptionCertificate string) (string, string,
 
 // HpcrContractSignedEncrypted - function to generate Signed and Encrypted contract
 func HpcrContractSignedEncrypted(contract, encryptionCertificate, privateKey string) (string, error) {
+	err := gen.VerifyContractWithSchema(contract)
+	if err != nil {
+		return "", fmt.Errorf("schema verification failed - %v", err)
+	}
+
 	if gen.CheckIfEmpty(contract, privateKey) {
 		return "", fmt.Errorf(emptyParameterErrStatement)
 	}
@@ -107,6 +112,11 @@ func HpcrContractSignedEncrypted(contract, encryptionCertificate, privateKey str
 
 // HpcrContractSignedEncryptedContractExpiry - function to generate sign with contract expiry enabled and encrypt contract (with CSR parameters and CSR file)
 func HpcrContractSignedEncryptedContractExpiry(contract, encryptionCertificate, privateKey, cacert, caKey, csrDataStr, csrPemData string, expiryDays int) (string, error) {
+	err := gen.VerifyContractWithSchema(contract)
+	if err != nil {
+		return "", fmt.Errorf("schema verification failed - %v", err)
+	}
+
 	if gen.CheckIfEmpty(contract, privateKey, cacert, caKey) {
 		return "", fmt.Errorf(emptyParameterErrStatement)
 	}

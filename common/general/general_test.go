@@ -264,10 +264,8 @@ func TestVerifyContractWithSchema(t *testing.T) {
 		t.Errorf("failed to read contract - %v", err)
 	}
 
-	result, err := VerifyContractWithSchema(contract)
+	err = VerifyContractWithSchema(contract)
 	if err != nil {
 		t.Errorf("schema verification failed - %v", err)
 	}
-
-	assert.True(t, result)
 }

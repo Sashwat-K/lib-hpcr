@@ -341,26 +341,26 @@ func GenerateTgzBase64(folderFilesPath []string) (string, error) {
 }
 
 // VerifyContractWithSchema - function to verify if contract matches schema
-func VerifyContractWithSchema(contract string) (bool, error) {
+func VerifyContractWithSchema(contract string) error {
 	jsonData, err := YamlToJson(contract)
 	if err != nil {
-		return false, fmt.Errorf("error converting YAML to JSON - %v", err)
+		return fmt.Errorf("error converting YAML to JSON - %v", err)
 	}
 
 	schema, err := gojsonschema.NewSchema(gojsonschema.NewBytesLoader([]byte(sch.ContractSchema)))
 	if err != nil {
-		return false, fmt.Errorf("failed to parse schema - %v", err)
+		return fmt.Errorf("failed to parse schema - %v", err)
 	}
 
 	report, err := schema.Validate(gojsonschema.NewBytesLoader([]byte(jsonData)))
 	if err != nil {
-		return false, fmt.Errorf("failed to validate contract - %v", err)
+		return fmt.Errorf("failed to validate contract - %v", err)
 	}
 
 	result := report.Valid()
 
 	if result {
-		return true, nil
+		return nil
 	} else {
 		var consolidatedErrors strings.Builder
 		for i, err := range report.Errors() {
@@ -370,6 +370,6 @@ func VerifyContractWithSchema(contract string) (bool, error) {
 			consolidatedErrors.WriteString(err.String())
 		}
 
-		return report.Valid(), fmt.Errorf("validation failed - %s", consolidatedErrors.String())
+		return fmt.Errorf("validation failed - %s", consolidatedErrors.String())
 	}
 }
