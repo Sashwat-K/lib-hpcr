@@ -357,9 +357,19 @@ func VerifyContractWithSchema(contract string) (bool, error) {
 		return false, fmt.Errorf("failed to validate contract - %v", err)
 	}
 
-	for _, err := range report.Errors() {
-		fmt.Printf("- %s\n", err)
-	}
+	result := report.Valid()
 
-	return report.Valid(), nil
+	if result {
+		return true, nil
+	} else {
+		var consolidatedErrors strings.Builder
+		for i, err := range report.Errors() {
+			if i > 0 {
+				consolidatedErrors.WriteString(", ")
+			}
+			consolidatedErrors.WriteString(err.String())
+		}
+
+		return report.Valid(), fmt.Errorf("validation failed - %s", consolidatedErrors.String())
+	}
 }

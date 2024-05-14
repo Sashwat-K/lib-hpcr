@@ -269,5 +269,5 @@ func TestVerifyContractWithSchema(t *testing.T) {
 		t.Errorf("schema verification failed - %v", err)
 	}
 
-	fmt.Println(result)
+	assert.True(t, result)
 }
