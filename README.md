@@ -2,7 +2,6 @@
 
 
 ## Introduction
-
 The library has been developed to simply the process for provisioning HPVS on both IBM Cloud and On Prem.
 For more details regarding HPVS, refer [Confidential computing with LinuxONE](https://cloud.ibm.com/docs/vpc?topic=vpc-about-se)
 
@@ -13,6 +12,7 @@ For more details regarding HPVS, refer [Confidential computing with LinuxONE](ht
 ### HpcrGetAttestationRecords()
 This function decrypts encrypted attestation records.
 
+### Example
 ```go
 import "github.com/Sashwat-K/lib-hpcr/attestation"
 
@@ -32,6 +32,7 @@ func main() {
 ### HpcrDownloadEncryptionCertificates()
 This function downloads HPCR encryption certificates from IBM Cloud.
 
+### Example
 ```go
 import "github.com/Sashwat-K/lib-hpcr/certificate"
 
@@ -50,6 +51,7 @@ func main() {
 ### HpcrGetEncryptionCertificateFromJson()
 This function returns encryption certificate and version from HpcrDownloadEncryptionCertificates() output.
 
+### Example
 ```go
 import "github.com/Sashwat-K/lib-hpcr/certificate"
 
@@ -70,11 +72,12 @@ func main() {
 ### HpcrText()
 This function generates Base64 for given string.
 
+### Example
 ```go
 import "github.com/Sashwat-K/lib-hpcr/contract"
 
 func main() {
-    base64, sha256, err := HpcrText(sampleStringData)
+    base64, inputSha256, outputSha256, err := HpcrText(sampleStringData)
 }
 ```
 
@@ -84,16 +87,18 @@ func main() {
 #### Output(s)
 1. Base64 of input
 2. Checksum of input
+3. Checksum of output
 
 
 ### HpcrTextEncrypted()
 This function encrypts text and formats text as per `hyper-protect-basic.<encoded-encrypted-password>.<encoded-encrypted-data>`.
 
+### Example
 ```go
 import "github.com/Sashwat-K/lib-hpcr/contract"
 
 func main() {
-    encryptedText, sha256, err := HpcrTextEncrypted(sampleStringData, encryptionCertificate)
+    encryptedText, inputSha256, outputSha256, err := HpcrTextEncrypted(sampleStringData, encryptionCertificate)
 }
 ```
 
@@ -104,16 +109,18 @@ func main() {
 #### Output(s)
 1. Encrypted text
 2. Checksum of input
+3. Checksum of output
 
 
 ### HpcrJson()
 This function generates Base64 of JSON input
 
+### Example
 ```go
 import "github.com/Sashwat-K/lib-hpcr/contract"
 
 func main() {
-    base64, sha256, err := HpcrJson(sampleStringJson)
+    base64, inputSha256, outputSha256, err := HpcrJson(sampleStringJson)
 }
 ```
 
@@ -123,16 +130,18 @@ func main() {
 #### Output(s)
 1. Base64 of input
 2. Checksum of input
+3. Checksum of output
 
 
 ### HpcrJsonEncrypted()
 This function generates encrypts JSON and formats text as per `hyper-protect-basic.<encoded-encrypted-password>.<encoded-encrypted-data>`.
 
+### Example
 ```go
 import "github.com/Sashwat-K/lib-hpcr/contract"
 
 func main() {
-    encryptedJson, sha256, err := HpcrJsonEncrypted(sampleStringJson, encryptionCertificate)
+    encryptedJson, inputSha256, outputSha256, err := HpcrJsonEncrypted(sampleStringJson, encryptionCertificate)
 }
 ```
 
@@ -143,16 +152,18 @@ func main() {
 #### Output(s)
 1. Encrypted text
 2. Checksum of input
+3. Checksum of output
 
 
 ### HpcrTgz()
 This function generates base64 of TGZ that contains files under the given folder
 
+### Example
 ```go
 import "github.com/Sashwat-K/lib-hpcr/contract"
 
 func main() {
-    encodedTgz, err := HpcrTgz(composePath)
+    encodedTgz, inputSha256, outputSha256, err := HpcrTgz(composePath)
 }
 ```
 
@@ -161,16 +172,19 @@ func main() {
 
 #### Output(s)
 1. Base64 of TGZ where TGZ is contents of given folder
+2. Checksum of imput
+3. Checksum of output
 
 
 ### HpcrTgzEncrypted()
 This function first generates base64 of TGZ that contains files under the given folder and then encrypts the data as per `hyper-protect-basic.<encoded-encrypted-password>.<encoded-encrypted-data>`.
 
+### Example
 ```go
 import "github.com/Sashwat-K/lib-hpcr/contract"
 
 func main() {
-    encodedTgz, err := HpcrTgzEncrypted(composePath, encryptionCertificate)
+    encodedTgz, inputSha256, outputSha256, err := HpcrTgzEncrypted(composePath, encryptionCertificate)
 }
 ```
 
@@ -179,16 +193,19 @@ func main() {
 
 #### Output(s)
 1. encrypted base64 of TGZ where TGZ is contents of given folder
+2. Checksum of input
+3. Checksum of output
 
 
 ### HpcrContractSignedEncrypted()
 This function generates a signed and encrypted contract with format `hyper-protect-basic.<encoded-encrypted-password>.<encoded-encrypted-data>`.
 
+### Example
 ```go
 import "github.com/Sashwat-K/lib-hpcr/contract"
 
 func main() {
-    signedEncryptedContract, err := HpcrContractSignedEncrypted(contract, encryptionCertificate, privateKey)
+    signedEncryptedContract, inputSha256, outputSha256, err := HpcrContractSignedEncrypted(contract, encryptionCertificate, privateKey)
 }
 ```
 
@@ -199,11 +216,14 @@ func main() {
 
 #### Output(s)
 1. Signed and encrypted contract
+2. Checksum of input
+3. Checksum of output
 
 
 ### HpcrContractSignedEncryptedContractExpiry()
 This function generates a signed and encrypted contract with contract expiry enabled. The output will be of the format `hyper-protect-basic.<encoded-encrypted-password>.<encoded-encrypted-data>`.
 
+### Example
 ```go
 import "github.com/Sashwat-K/lib-hpcr/contract"
 
@@ -218,11 +238,11 @@ func usingCsrParams() {
 		"mail":     "sashwat.k@ibm.com",
 	}
 
-    signedEncryptedCEContract, err := HpcrContractSignedEncryptedContractExpiry(contract, encryptionCertificate, privateKey, caCert, caKey, string(csrParams), "", sampleContractExpiryDays)
+    signedEncryptedCEContract, inputSha256, outputSha256, err := HpcrContractSignedEncryptedContractExpiry(contract, encryptionCertificate, privateKey, caCert, caKey, string(csrParams), "", sampleContractExpiryDays)
 }
 
 func usingCsrPem() {
-    signedEncryptedCEContract, err := HpcrContractSignedEncryptedContractExpiry(contract, encryptionCertificate, privateKey, caCert, caKey, "", csr, sampleContractExpiryDays)
+    signedEncryptedCEContract, inputSha256, outputSha256, err := HpcrContractSignedEncryptedContractExpiry(contract, encryptionCertificate, privateKey, caCert, caKey, "", csr, sampleContractExpiryDays)
 }
 ```
 
@@ -252,11 +272,14 @@ The CSR parameters should be of the format:-
 
 #### Output(s)
 1. Signed and encrypted contract
+2. Checksum of input
+3. Checksum of output
 
 
 ### HpcrSelectImage()
 This function selects the latest HPCR image details from image list out from IBM Cloud images API.
 
+### Example
 ```go
 import "github.com/Sashwat-K/lib-hpcr/image"
 
