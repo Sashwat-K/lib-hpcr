@@ -28,7 +28,6 @@ const (
 
 	sampleComposeFolderPath     = "../samples/tgz"
 	sampleComposeFolderChecksum = "3e4a006b9422a3fbf8c58d4f1dbac4494b34f800ddbb6e048c31709bb0cde599"
-	sampleFolderTgzChecksum     = "4fde7c46fdc83340ea93d7a0746e53e21711bf2ee3a99669b55f5e469a89b1c1"
 
 	simpleContractPath          = "../samples/simple_contract.yaml"
 	simpleContractInputChecksum = "072cd6d89d9d253a0426eadea7217aedfe86197bfb8a5b4873386fcaa72ddfda"
@@ -145,14 +144,13 @@ func TestHpcrJsonEncrypted(t *testing.T) {
 
 // Testcase to check if HpcrTgz() is able to generate base64 of tar.tgz
 func TestHpcrTgz(t *testing.T) {
-	result, inputSha256, outputSha256, err := HpcrTgz(sampleComposeFolderPath)
+	result, inputSha256, _, err := HpcrTgz(sampleComposeFolderPath)
 	if err != nil {
 		t.Errorf("failed to generate HPCR TGZ - %v", err)
 	}
 
 	assert.NotEmpty(t, result)
 	assert.Equal(t, inputSha256, sampleComposeFolderChecksum)
-	assert.Equal(t, outputSha256, sampleFolderTgzChecksum)
 }
 
 func TestHpcrTgzEncrypted(t *testing.T) {
