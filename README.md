@@ -1,5 +1,7 @@
 # lib-hpcr
 
+[![pkg.go.dev](https://img.shields.io/badge/pkg.go.dev-blue)](https://pkg.go.dev/github.com/Sashwat-K/lib-hpcr) 
+![Testcase status](https://github.com/Sashwat-K/lib-hpcr/actions/workflows/makefile.yml/badge.svg)
 
 ## Introduction
 The library has been developed to simply the process for provisioning HPVS on both IBM Cloud and On Prem.
@@ -300,4 +302,4 @@ func main() {
 
 
 ## Questions
-Ping me in slack @Sashwat
+Shoot mail @ sashwat.k@ibm.com
