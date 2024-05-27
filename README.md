@@ -1,6 +1,6 @@
 # lib-hpcr
 
-[![pkg.go.dev](https://img.shields.io/badge/pkg.go.dev-blue)](https://pkg.go.dev/github.com/Sashwat-K/lib-hpcr) 
+[![Go Reference](https://pkg.go.dev/badge/github.com/Sashwat-K/lib-hpcr.svg)](https://pkg.go.dev/github.com/Sashwat-K/lib-hpcr)
 ![Testcase status](https://github.com/Sashwat-K/lib-hpcr/actions/workflows/makefile.yml/badge.svg)
 
 ## Introduction
