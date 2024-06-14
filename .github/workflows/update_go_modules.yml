@@ -26,9 +26,6 @@ jobs:
         with:
           go-version: '^1.17'
 
-      - name: Save current go.mod
-        run: cp go.mod go.mod.bak
-
       - name: Get current Go version
         id: get_current_go_version
         run: |
@@ -56,12 +53,6 @@ jobs:
           go get -u ./...
           go mod tidy
 
-      - name: Get updated modules
-        id: get_updated_modules
-        run: |
-          echo "Updated modules:" > updated_modules.txt
-          go list -m -u all | awk 'NR>1' >> updated_modules.txt
-
       - name: Check for changes
         id: check_changes
         run: |
@@ -82,21 +73,6 @@ jobs:
             echo "exit_code=1" >> $GITHUB_ENV
           fi
 
-      - name: Generate PR body
-        if: env.exit_code == '1'
-        id: generate_pr_body
-        run: |
-          echo "# Updated Go Modules" > pr_body.md
-          echo "" >> pr_body.md
-          echo "The following Go modules were updated:" >> pr_body.md
-          echo "" >> pr_body.md
-          cat updated_modules.txt >> pr_body.md
-          echo "" >> pr_body.md
-          if [ "${{ env.GO_VERSION_UPDATED }}" == "true" ]; then
-            echo "Go version updated from ${{ env.CURRENT_GO_VERSION }} to ${{ env.LATEST_GO_VERSION }}" >> pr_body.md
-          fi
-          echo "pr_body=$(cat pr_body.md)" >> $GITHUB_ENV
-
       - name: Create Pull Request
         if: env.exit_code == '1'
         uses: peter-evans/create-pull-request@v3
@@ -106,5 +82,5 @@ jobs:
           branch: ${{ env.BRANCH_NAME }}
           base: main
           title: Update Go modules and Go version
-          body: ${{ env.pr_body }}
+          body: Update Go and Go modules
           labels: go-modules, automated-update
