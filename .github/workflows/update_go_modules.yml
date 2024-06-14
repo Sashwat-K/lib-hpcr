@@ -1,9 +1,6 @@
 name: Update Go Modules
 
 on:
-  push:
-    branches:
-      - main
   schedule:
     - cron: '0 0 * * *' # Runs every day at midnight
   workflow_dispatch: # Allows manual triggering of the workflow
@@ -79,6 +76,7 @@ jobs:
             BRANCH_NAME="update-go-modules-$TIMESTAMP"
             git checkout -b $BRANCH_NAME
             git add go.mod go.sum
+            git diff --name-only --cached
             git commit -m "Update Go modules and Go version to the latest version"
             git push --set-upstream origin $BRANCH_NAME
             echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
@@ -98,6 +96,11 @@ jobs:
           if [ "${{ env.GO_VERSION_UPDATED }}" == "true" ]; then
             echo "Go version updated from ${{ env.CURRENT_GO_VERSION }} to ${{ env.LATEST_GO_VERSION }}" >> pr_body.md
           fi
+          cat pr_body.md
+        shell: bash
+      - name: Read PR body
+        id: read_pr_body
+        run: echo "PR_BODY=$(<pr_body.md)" >> $GITHUB_ENV
 
       - name: Create Pull Request
         if: env.exit_code == '1'
@@ -108,5 +111,5 @@ jobs:
           branch: ${{ env.BRANCH_NAME }}
           base: main
           title: Update Go modules and Go version
-          body: file://pr_body.md
+          body: ${{ env.PR_BODY }}
           labels: go-modules, automated-update
