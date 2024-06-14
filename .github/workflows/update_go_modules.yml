@@ -16,6 +16,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      - name: Ensure running on main branch
+        id: check_branch
+        run: |
+          if [ "${{ github.ref }}" != "refs/heads/main" ]; then
+            echo "Not on main branch, exiting."
+            exit 1
+          fi
+
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
@@ -90,7 +98,6 @@ jobs:
           if [ "${{ env.GO_VERSION_UPDATED }}" == "true" ]; then
             echo "Go version updated from ${{ env.CURRENT_GO_VERSION }} to ${{ env.LATEST_GO_VERSION }}" >> pr_body.md
           fi
-          echo "pr_body=$(cat pr_body.md)" >> $GITHUB_ENV
 
       - name: Create Pull Request
         if: env.exit_code == '1'
@@ -100,5 +107,5 @@ jobs:
           commit-message: Update Go modules and Go version to the latest version
           branch: ${{ env.BRANCH_NAME }}
           title: Update Go modules and Go version
-          body: ${{ env.pr_body }}
+          body: file://pr_body.md
           labels: go-modules, automated-update
