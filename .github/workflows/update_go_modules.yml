@@ -1,6 +1,9 @@
 name: Update Go Modules
 
 on:
+  push:
+    branches:
+      - main
   schedule:
     - cron: '0 0 * * *' # Runs every day at midnight
   workflow_dispatch: # Allows manual triggering of the workflow
@@ -41,6 +44,7 @@ jobs:
             echo "GO_VERSION_UPDATED=true" >> $GITHUB_ENV
           else
             echo "GO_VERSION_UPDATED=false" >> $GITHUB_ENV
+          fi
 
       - name: Update Go modules
         run: |
