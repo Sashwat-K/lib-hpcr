@@ -95,7 +95,7 @@ jobs:
           if [ "${{ env.GO_VERSION_UPDATED }}" == "true" ]; then
             echo "Go version updated from ${{ env.CURRENT_GO_VERSION }} to ${{ env.LATEST_GO_VERSION }}" >> pr_body.md
           fi
-          pr_body=$(<pr_body.md)
+          pr_body=$(cat pr_body.md | jq -sRr @uri)
           echo "::set-output name=pr_body::$pr_body"
 
       - name: Create Pull Request
