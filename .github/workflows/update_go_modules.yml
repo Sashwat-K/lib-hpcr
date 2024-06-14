@@ -106,6 +106,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: Update Go modules and Go version to the latest version
           branch: ${{ env.BRANCH_NAME }}
+          base: main
           title: Update Go modules and Go version
           body: file://pr_body.md
           labels: go-modules, automated-update
