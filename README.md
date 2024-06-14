@@ -1,7 +1,7 @@
 # lib-hpcr
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/Sashwat-K/lib-hpcr.svg)](https://pkg.go.dev/github.com/Sashwat-K/lib-hpcr)
-![Testcase status](https://github.com/Sashwat-K/lib-hpcr/actions/workflows/makefile.yml/badge.svg)
+![Testcase status](https://github.com/Sashwat-K/lib-hpcr/actions/workflows/make_test.yml/badge.svg)
 
 ## Introduction
 The library has been developed to simply the process for provisioning HPVS on both IBM Cloud and On Prem.
