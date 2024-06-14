@@ -1,6 +1,9 @@
 name: Update Go Modules
 
 on:
+  push:
+    branches:
+      - main
   schedule:
     - cron: '0 0 * * *' # Runs every day at midnight
   workflow_dispatch: # Allows manual triggering of the workflow
@@ -95,8 +98,14 @@ jobs:
           if [ "${{ env.GO_VERSION_UPDATED }}" == "true" ]; then
             echo "Go version updated from ${{ env.CURRENT_GO_VERSION }} to ${{ env.LATEST_GO_VERSION }}" >> pr_body.md
           fi
-          pr_body=$(cat pr_body.md | jq -sRr @uri)
-          echo "::set-output name=pr_body::$pr_body"
+
+      - name: Read PR body
+        id: read_pr_body
+        run: |
+          PR_BODY=$(cat pr_body.md)
+          echo "PR_BODY<<EOF" >> $GITHUB_ENV
+          echo "$PR_BODY" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
 
       - name: Create Pull Request
         if: env.exit_code == '1'
@@ -107,5 +116,5 @@ jobs:
           branch: ${{ env.BRANCH_NAME }}
           base: main
           title: Update Go modules and Go version
-          body: ${{ steps.generate_pr_body.outputs.pr_body }}
+          body: ${{ env.PR_BODY }}
           labels: go-modules, automated-update
