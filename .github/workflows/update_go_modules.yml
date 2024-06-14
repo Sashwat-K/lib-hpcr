@@ -26,6 +26,9 @@ jobs:
         with:
           go-version: '^1.17'
 
+      - name: Save current go.mod
+        run: cp go.mod go.mod.bak
+
       - name: Get current Go version
         id: get_current_go_version
         run: |
@@ -82,5 +85,4 @@ jobs:
           branch: ${{ env.BRANCH_NAME }}
           base: main
           title: Update Go modules and Go version
-          body: Update Go and Go modules
           labels: go-modules, automated-update
