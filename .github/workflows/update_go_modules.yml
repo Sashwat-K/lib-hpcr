@@ -1,0 +1,100 @@
+name: Update Go Modules
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Runs every day at midnight
+  workflow_dispatch: # Allows manual triggering of the workflow
+
+jobs:
+  update_go_modules:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: '^1.17'
+
+      - name: Save current go.mod
+        run: cp go.mod go.mod.bak
+
+      - name: Get current Go version
+        id: get_current_go_version
+        run: |
+          CURRENT_GO_VERSION=$(grep '^go ' go.mod | cut -d ' ' -f 2)
+          echo "CURRENT_GO_VERSION=$CURRENT_GO_VERSION" >> $GITHUB_ENV
+
+      - name: Get latest Go version
+        id: get_latest_go_version
+        run: |
+          LATEST_GO_VERSION=$(go version | cut -d ' ' -f 3 | sed 's/go//')
+          echo "LATEST_GO_VERSION=$LATEST_GO_VERSION" >> $GITHUB_ENV
+
+      - name: Update Go version in go.mod if needed
+        id: update_go_version
+        run: |
+          if [ "${{ env.CURRENT_GO_VERSION }}" != "${{ env.LATEST_GO_VERSION }}" ]; then
+            sed -i "s/^go .*/go $LATEST_GO_VERSION/" go.mod
+            echo "GO_VERSION_UPDATED=true" >> $GITHUB_ENV
+          else
+            echo "GO_VERSION_UPDATED=false" >> $GITHUB_ENV
+
+      - name: Update Go modules
+        run: |
+          go get -u ./...
+          go mod tidy
+
+      - name: Get updated modules
+        id: get_updated_modules
+        run: |
+          echo "Updated modules:" > updated_modules.txt
+          go list -m -u all | awk 'NR>1' >> updated_modules.txt
+
+      - name: Check for changes
+        id: check_changes
+        run: |
+          if git diff --quiet; then
+            echo "No changes in go.mod or go.sum"
+            echo "exit_code=0" >> $GITHUB_ENV
+          else
+            echo "Changes found in go.mod or go.sum"
+            git config --global user.name "github-actions[bot]"
+            git config --global user.email "github-actions[bot]@users.noreply.github.com"
+            TIMESTAMP=$(date +%Y%m%d%H%M%S)
+            BRANCH_NAME="update-go-modules-$TIMESTAMP"
+            git checkout -b $BRANCH_NAME
+            git add go.mod go.sum
+            git commit -m "Update Go modules and Go version to the latest version"
+            git push --set-upstream origin $BRANCH_NAME
+            echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+            echo "exit_code=1" >> $GITHUB_ENV
+          fi
+
+      - name: Generate PR body
+        if: env.exit_code == '1'
+        id: generate_pr_body
+        run: |
+          echo "# Updated Go Modules" > pr_body.md
+          echo "" >> pr_body.md
+          echo "The following Go modules were updated:" >> pr_body.md
+          echo "" >> pr_body.md
+          cat updated_modules.txt >> pr_body.md
+          echo "" >> pr_body.md
+          if [ "${{ env.GO_VERSION_UPDATED }}" == "true" ]; then
+            echo "Go version updated from ${{ env.CURRENT_GO_VERSION }} to ${{ env.LATEST_GO_VERSION }}" >> pr_body.md
+          fi
+          echo "pr_body=$(cat pr_body.md)" >> $GITHUB_ENV
+
+      - name: Create Pull Request
+        if: env.exit_code == '1'
+        uses: peter-evans/create-pull-request@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: Update Go modules and Go version to the latest version
+          branch: ${{ env.BRANCH_NAME }}
+          title: Update Go modules and Go version
+          body: ${{ env.pr_body }}
+          labels: go-modules, automated-update
