@@ -1,0 +1,90 @@
+name: Increment Tag and Create Release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  increment_tag_and_release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Fetch all tags
+        run: git fetch --tags
+
+      - name: Get the latest tag
+        id: get_latest_tag
+        run: |
+          LATEST_TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
+          echo "LATEST_TAG=$LATEST_TAG" >> $GITHUB_ENV
+
+      - name: Calculate next version
+        id: calculate_version
+        run: |
+          LATEST_TAG=${{ env.LATEST_TAG }}
+          echo "Latest tag: $LATEST_TAG"
+
+          # Extract the current version parts
+          VERSION_REGEX="^v([0-9]+)\.([0-9]+)\.([0-9]+)$"
+          if [[ $LATEST_TAG =~ $VERSION_REGEX ]]; then
+            MAJOR="${BASH_REMATCH[1]}"
+            MINOR="${BASH_REMATCH[2]}"
+            PATCH="${BASH_REMATCH[3]}"
+          else
+            echo "Invalid tag format: $LATEST_TAG"
+            exit 1
+          fi
+
+          # Increment the patch version
+          NEXT_PATCH=$((PATCH + 1))
+          NEXT_MINOR=$MINOR
+          NEXT_MAJOR=$MAJOR
+
+          # Check if patch needs to be reset and minor incremented
+          if [[ $NEXT_PATCH -ge 10 ]]; then
+            NEXT_PATCH=0
+            NEXT_MINOR=$((MINOR + 1))
+          fi
+
+          # Check if minor needs to be reset and major incremented
+          if [[ $NEXT_MINOR -ge 10 ]]; then
+            NEXT_MINOR=0
+            NEXT_MAJOR=$((MAJOR + 1))
+          fi
+
+          NEXT_VERSION="v${NEXT_MAJOR}.${NEXT_MINOR}.${NEXT_PATCH}"
+          echo "NEXT_VERSION=$NEXT_VERSION" >> $GITHUB_ENV
+
+      - name: Configure Git
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+      - name: Create new tag
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          NEXT_VERSION=${{ env.NEXT_VERSION }}
+          git tag $NEXT_VERSION
+          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} $NEXT_VERSION
+
+      - name: Get commit message
+        id: get_commit_message
+        run: |
+          COMMIT_MESSAGE=$(git log -1 --pretty=format:%s)
+          echo "COMMIT_MESSAGE=$COMMIT_MESSAGE" >> $GITHUB_ENV
+
+      - name: Create GitHub release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.NEXT_VERSION }}
+          release_name: Release ${{ env.NEXT_VERSION }}
+          body: ${{ env.COMMIT_MESSAGE }}
+          draft: false
+          prerelease: false
