@@ -7,6 +7,7 @@
 The library has been developed to simply the process for provisioning HPVS on both IBM Cloud and On Prem.
 For more details regarding HPVS, refer [Confidential computing with LinuxONE](https://cloud.ibm.com/docs/vpc?topic=vpc-about-se)
 
+This library depends on Sashwat-K/hpcr-encryption-certificate and Sashwat-K/hpcr-contract-schema Go libraries to get latest HPCR certificate and HPCR contract schema respectively.
 
 ## Usage
 
@@ -300,6 +301,10 @@ func main() {
 3. Image checksum
 4. Image version
 
+## Other Repos
+
+1. [Sashwat-K/hpcr-encryption-certificate](https://github.com/Sashwat-K/hpcr-encryption-certificate) - Go library that gets latest HPCR encryption certificate
+2. [Sashwat-K/hpcr-contract-schema](https://github.com/Sashwat-K/hpcr-contract-schema) - Go library that gets latest HPCR contract schema
 
 ## Questions
 Shoot mail @ sashwat.k@ibm.com
