@@ -21,7 +21,7 @@ jobs:
       - name: Update Go Version
         id: update-go-version
         run: |
-          latest_go_version=$(curl -s https://go.dev/VERSION?m=text)
+          latest_go_version=$(curl -s https://go.dev/VERSION?m=text | head -n 1)
           go mod edit -go=${latest_go_version#go}
           echo "Updated go version to ${latest_go_version#go}"
           echo "::set-output name=latest_go_version::${latest_go_version#go}"
