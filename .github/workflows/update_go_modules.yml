@@ -22,7 +22,7 @@ jobs:
         id: update-go-version
         run: |
           latest_go_version=$(curl -s https://go.dev/VERSION?m=text | head -n 1 | awk -F 'go' '{print $2}')
-          go mod edit -go=${latest_go_version}
+          go mod edit -go ${latest_go_version}
           echo "Updated go version to ${latest_go_version}"
           echo "::set-output name=latest_go_version::${latest_go_version}"
 
