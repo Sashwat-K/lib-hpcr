@@ -1,88 +1,59 @@
-name: Update Go Modules
+name: Update Go and Modules
 
 on:
   schedule:
-    - cron: '0 0 * * *' # Runs every day at midnight
-  workflow_dispatch: # Allows manual triggering of the workflow
+    - cron: '0 0 * * 1' # Runs every Monday at midnight
+  workflow_dispatch: # Allows manual triggering
 
 jobs:
-  update_go_modules:
+  update-go-and-modules:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Ensure running on main branch
-        id: check_branch
-        run: |
-          if [ "${{ github.ref }}" != "refs/heads/main" ]; then
-            echo "Not on main branch, exiting."
-            exit 1
-          fi
-
       - name: Set up Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v4
         with:
-          go-version: '^1.17'
+          go-version: '^1.18' # Initial Go version for setup
 
-      - name: Save current go.mod
-        run: cp go.mod go.mod.bak
-
-      - name: Get current Go version
-        id: get_current_go_version
+      - name: Update Go Version
         run: |
-          CURRENT_GO_VERSION=$(grep '^go ' go.mod | cut -d ' ' -f 2)
-          echo "CURRENT_GO_VERSION=$CURRENT_GO_VERSION" >> $GITHUB_ENV
+          latest_go_version=$(curl -s https://golang.org/VERSION?m=text)
+          go mod edit -go=${latest_go_version#go}
+          echo "Updated go version to ${latest_go_version#go}"
 
-      - name: Get latest Go version
-        id: get_latest_go_version
-        run: |
-          LATEST_GO_VERSION=$(go version | cut -d ' ' -f 3 | sed 's/go//')
-          echo "LATEST_GO_VERSION=$LATEST_GO_VERSION" >> $GITHUB_ENV
+      - name: Set up Updated Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ steps.update-go-version.outputs.latest_go_version }}
 
-      - name: Update Go version in go.mod if needed
-        id: update_go_version
-        run: |
-          if [ "${{ env.CURRENT_GO_VERSION }}" != "${{ env.LATEST_GO_VERSION }}" ]; then
-            sed -i "s/^go .*/go $LATEST_GO_VERSION/" go.mod
-            echo "GO_VERSION_UPDATED=true" >> $GITHUB_ENV
-          else
-            echo "GO_VERSION_UPDATED=false" >> $GITHUB_ENV
-          fi
-
-      - name: Update Go modules
+      - name: Update Go Modules
         run: |
           go get -u ./...
           go mod tidy
+          go mod vendor
 
-      - name: Check for changes
-        id: check_changes
+      - name: Commit changes
         run: |
-          if git diff --quiet; then
-            echo "No changes in go.mod or go.sum"
-            echo "exit_code=0" >> $GITHUB_ENV
-          else
-            echo "Changes found in go.mod or go.sum"
-            git config --global user.name "github-actions[bot]"
-            git config --global user.email "github-actions[bot]@users.noreply.github.com"
-            TIMESTAMP=$(date +%Y%m%d%H%M%S)
-            BRANCH_NAME="update-go-modules-$TIMESTAMP"
-            git checkout -b $BRANCH_NAME
-            git add go.mod go.sum
-            git commit -m "Update Go modules and Go version to the latest version"
-            git push --set-upstream origin $BRANCH_NAME
-            echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
-            echo "exit_code=1" >> $GITHUB_ENV
-          fi
+          git config --global user.name 'github-actions'
+          git config --global user.email 'github-actions@github.com'
+          git add .
+          git commit -m "Update Go version and modules to latest version" || echo "No changes to commit"
+
+      - name: Get current timestamp
+        id: timestamp
+        run: echo "::set-output name=date::$(date +'%Y%m%d%H%M%S')"
 
       - name: Create Pull Request
-        if: env.exit_code == '1'
-        uses: peter-evans/create-pull-request@v3
+        id: create_pr
+        uses: peter-evans/create-pull-request@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: Update Go modules and Go version to the latest version
-          branch: ${{ env.BRANCH_NAME }}
+          commit-message: Update Go version and modules to latest version
+          branch: update-go-and-modules-${{ steps.timestamp.outputs.date }}
           base: main
-          title: Update Go modules and Go version
-          labels: go-modules, automated-update
+          title: Update Go version and modules to latest version
+          body: |
+            This PR updates the Go version and its modules to the latest version.
+          labels: go, dependencies
