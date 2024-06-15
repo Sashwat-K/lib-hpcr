@@ -16,13 +16,15 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: '^1.18' # Initial Go version for setup
+          go-version: '1.18' # Initial Go version for setup
 
       - name: Update Go Version
+        id: update-go-version
         run: |
-          latest_go_version=$(curl -s https://golang.org/VERSION?m=text)
+          latest_go_version=$(curl -s https://go.dev/VERSION?m=text)
           go mod edit -go=${latest_go_version#go}
           echo "Updated go version to ${latest_go_version#go}"
+          echo "::set-output name=latest_go_version::${latest_go_version#go}"
 
       - name: Set up Updated Go
         uses: actions/setup-go@v4
