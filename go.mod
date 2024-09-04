@@ -3,7 +3,7 @@ module github.com/Sashwat-K/lib-hpcr
 go 1.22.4
 
 require (
-	github.com/Masterminds/semver/v3 v3.2.1
+	github.com/Masterminds/semver/v3 v3.3.0
 	github.com/Sashwat-K/hpcr-contract-schema v1.0.4
 	github.com/Sashwat-K/hpcr-encryption-certificate v1.0.7
 	github.com/stretchr/testify v1.9.0
